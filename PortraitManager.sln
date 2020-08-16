@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30309.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortraitManager", "PortraitManager\PortraitManager.csproj", "{B3C651A4-19DB-44D6-8944-EBCBED8C9A46}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModMaker", "..\KingmakerModMaker\ModMaker\ModMaker.shproj", "{7D3F9428-C134-47FE-9D04-305B4D330401}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\KingmakerModMaker\ModMaker\ModMaker.projitems*{7d3f9428-c134-47fe-9d04-305b4d330401}*SharedItemsImports = 13
+		..\KingmakerModMaker\ModMaker\ModMaker.projitems*{b3c651a4-19db-44d6-8944-ebcbed8c9a46}*SharedItemsImports = 4
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B3C651A4-19DB-44D6-8944-EBCBED8C9A46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3C651A4-19DB-44D6-8944-EBCBED8C9A46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3C651A4-19DB-44D6-8944-EBCBED8C9A46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3C651A4-19DB-44D6-8944-EBCBED8C9A46}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D9DD2F8F-F11E-4D80-8C79-1B2AD33ADC58}
+	EndGlobalSection
+EndGlobal
