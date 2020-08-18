@@ -3,7 +3,7 @@
   "DisplayName": "Pathfinder Portrait Manager",
   "Author": "Ilkar",
   "Version": "0.0.1",
-  "ManagerVersion": "0.14.1",
+  "ManagerVersion": "0.22.0",
   "Requirements": [],
   "EntryMethod": "PortraitManager.Main.Load"
 }
