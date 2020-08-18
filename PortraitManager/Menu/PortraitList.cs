@@ -7,12 +7,12 @@ using UnityEngine;
 using UnityModManagerNet;
 using ModMaker;
 using ModMaker.Utility;
-using static PortraitManager.Main;
-using static PortraitManager.Helpers;
-using static PortraitManager.Utility.SettingsWrapper;
+using static KingmakerPortraitManager.Main;
+using static KingmakerPortraitManager.Helpers;
+using static KingmakerPortraitManager.Utility.SettingsWrapper;
 using Kingmaker.Blueprints;
 
-namespace PortraitManager.Menu
+namespace KingmakerPortraitManager.Menu
 {
     class PortraitList : IMenuSelectablePage
     {
@@ -23,6 +23,7 @@ namespace PortraitManager.Menu
         private string[] portraitIDs;
         private PortraitData portraitData;
         private GUIStyle _buttonStyle;
+        private Vector2 _scrollPosition;
 
         public void OnGUI(UnityModManager.ModEntry modEntry)
         {
@@ -45,7 +46,9 @@ namespace PortraitManager.Menu
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_UnloadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
-                    //TODO
+                    portraitData = null;
+                    portraitIDs = null;
+                    portraitDatas = null;
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitData"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
@@ -61,15 +64,19 @@ namespace PortraitManager.Menu
                     //3nd column - portrait image
                     using (new GUILayout.VerticalScope(GUILayout.ExpandWidth(false)))
                     {
-                        GUIHelper.SelectionGrid(ref portraitIndex, portraitIDs, 1,
-                            () =>
-                            {
-                                portraitData = portraitDatas[portraitIndex];
-                            }, _buttonStyle, GUILayout.ExpandWidth(false));
+                        using (var ScrollView = new GUILayout.ScrollViewScope(_scrollPosition))
+                        {
+                            _scrollPosition = ScrollView.scrollPosition;
+                            GUIHelper.SelectionGrid(ref portraitIndex, portraitIDs, 1,
+                                () =>
+                                {
+                                    portraitData = portraitDatas[portraitIndex];
+                                }, _buttonStyle, GUILayout.ExpandWidth(false));
+                        }
                     }
                     using (new GUILayout.VerticalScope())
                     {
-                        //TODO: Readonly labels IsCustom, IsDefault, CustomID
+                        //TODO: labels hash (colored if it's wrong)
                         //TOOD: 
                         //TODO: Buttons Open folder, Add tag, Remove tag, Clear tags, Save data
                         GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_IsCustom"], portraitData.IsCustom));

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using static PortraitManager.Main;
+using static KingmakerPortraitManager.Main;
 
-namespace PortraitManager.Utility
+namespace KingmakerPortraitManager.Utility
 {
     public static class SettingsWrapper
     {

@@ -2,7 +2,7 @@
 using System.Reflection;
 using ModMaker;
 
-namespace PortraitManager
+namespace KingmakerPortraitManager
 {
     class Core
     {

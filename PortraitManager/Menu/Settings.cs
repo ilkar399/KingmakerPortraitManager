@@ -7,10 +7,10 @@ using UnityEngine;
 using UnityModManagerNet;
 using ModMaker;
 using ModMaker.Utility;
-using static PortraitManager.Main;
-using static PortraitManager.Utility.SettingsWrapper;
+using static KingmakerPortraitManager.Main;
+using static KingmakerPortraitManager.Utility.SettingsWrapper;
 
-namespace PortraitManager.Menu
+namespace KingmakerPortraitManager.Menu
 {
     class Settings: IMenuSelectablePage
     {
@@ -26,7 +26,7 @@ namespace PortraitManager.Menu
 #if (DEBUG)
             if (GUILayout.Button("Run tests", _buttonStyle, GUILayout.ExpandWidth(false)))
             {
-                //TODO: Add tessssssssts
+                //TODO: Add tessssssssts. Separate for data getters, tag management, harmony patching and UI patching.
             }
 #endif
         }

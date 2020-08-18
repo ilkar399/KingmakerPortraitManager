@@ -4,10 +4,10 @@ using Kingmaker.Blueprints;
 using UnityModManagerNet;
 using ModMaker;
 using ModMaker.Utility;
-using static PortraitManager.Utility.SettingsWrapper;
+using static KingmakerPortraitManager.Utility.SettingsWrapper;
 
 
-namespace PortraitManager
+namespace KingmakerPortraitManager
 {
 #if (DEBUG)
     [EnableReloading]

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using ModMaker;
 using Kingmaker.EntitySystem.Persistence.JsonUtility;
 
-namespace PortraitManager
+namespace KingmakerPortraitManager
 {
     [JsonObject(MemberSerialization.OptOut)]
     public class DefaultLanguage: ILanguage

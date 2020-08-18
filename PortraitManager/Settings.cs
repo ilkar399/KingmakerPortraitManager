@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityModManagerNet;
 
 
-namespace PortraitManager
+namespace KingmakerPortraitManager
 {
     public class Settings : UnityModManager.ModSettings
     {
