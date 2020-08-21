@@ -7,11 +7,17 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Kingmaker.Blueprints;
+using Kingmaker.Blueprints.Root;
+using Kingmaker.Blueprints.Validation;
+using UnityEngine;
 using TinyJson;
 using Kingmaker.EntitySystem.Persistence.JsonUtility;
+using static KingmakerPortraitManager.Utility.SettingsWrapper;
+
 
 namespace KingmakerPortraitManager
 {
+    //Tag Data class. Note that hash is always calculated only based on FullLengthPortrait texture
     [Serializable]
     public class TagData
     {
@@ -27,72 +33,104 @@ namespace KingmakerPortraitManager
         }
 
 
-        public void SaveData(string basePath)
+        //Serializer and deserializer.
+        public void SaveData()
         {
-            //TODO: Save data into file
             var JsonSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
-                Converters = DefaultJsonSettings.CommonConverters.ToList<JsonConverter>(),
-                ContractResolver = new OptInContractResolver(),
                 TypeNameHandling = TypeNameHandling.Auto,
                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize
             };
+            DefaultJsonSettings.Initialize();
             try
             {
-                var serializer = JsonSerializer.Create(JsonSettings);
-                using (var file = new StreamWriter(basePath + $"/KingmakerPortraitManager/tags/{this.CustomId}.json"))
-                using (JsonWriter writer = new JsonTextWriter(file))
+                if (!Directory.Exists(ModPath + @"/tags/"))
                 {
+                    Directory.CreateDirectory(ModPath + @"/tags/");
+                }
+                JsonSerializer serializer = JsonSerializer.Create(JsonSettings);
+                using (StreamWriter sw = new StreamWriter(ModPath + $"/tags/{this.CustomId}.json"))
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {   
                     serializer.Serialize(writer, this);
                 }
             }
             catch (Exception e)
             {
+                Main.Mod.Log($"Error processing {this.CustomId}");
                 Main.Mod.Log(e.StackTrace);
             }
         }
 
-        public TagData LoadData(string filePath)
+        public static TagData LoadData(string filePath)
         {
             TagData result;
             var JsonSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
-                Converters = DefaultJsonSettings.CommonConverters.ToList<JsonConverter>(),
-                ContractResolver = new OptInContractResolver(),
                 TypeNameHandling = TypeNameHandling.Auto,
                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize
             };
             var serializer = JsonSerializer.Create(JsonSettings);
-            using (var file = new StreamReader(filePath))
-            using (JsonReader reader = new JsonTextReader(file))
+            try
             {
-                result = serializer.Deserialize<TagData>(reader);
+
+                using (var file = new StreamReader(filePath))
+                using (JsonReader reader = new JsonTextReader(file))
+                {
+                    result = serializer.Deserialize<TagData>(reader);
+                }
+                return result;
             }
-            return result;
+            catch (Exception e)
+            {
+                Main.Mod.Log(e.StackTrace);
+                return null;
+            }
         }
 
     }
 
     class Tags
     {
-        public Dictionary<string, TagData> LoadTagsData()
+        public static Dictionary<string, TagData> LoadTagsData()
         {
-            //TODO: Load tag data from json files. Returns dictionary of 
-            //customids and tagdata
             var result = new Dictionary<string, TagData>();
+            try
+            {
+                if (!Directory.Exists(ModPath + @"/tags/"))
+                {
+                    Directory.CreateDirectory(ModPath + @"/tags/");
+                }
+                string[] tagFiles = Directory.GetFiles(ModPath + @"/tags/", "*.json");
+                foreach (string tagFile in tagFiles)
+                {
+                    var tagData = TagData.LoadData(tagFile);
+                    if (tagData != null)
+                    {
+                        result.Add(tagData.CustomId,tagData);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Main.Mod.Log(e.StackTrace);
+                return null;
+            }
             return result;
         }
 
-        public Dictionary<string,TagData> HashDictionary(Dictionary<string,TagData> tagsData, Boolean SkipBase)
+        //Converting from the {customId,tagData} dictionary to the {hash,tagData} one
+        public static  Dictionary<string,TagData> HashDictionary(Dictionary<string,TagData> tagsData, Boolean SkipBase)
         {
-            //TODO: add skipping base (blank) portraits
             //TODO: hash collisions and duplicate portraits
             var result = new Dictionary<string, TagData>();
+            string defaultHash = Helpers.GetPseudoHash(BlueprintRoot.Instance.CharGen.BasePortraitBig.texture).ToString();
             foreach (string tagID in tagsData.Keys)
             {
                 var tHash = tagsData[tagID].Hash;
+                if (tHash == defaultHash) { continue; }
                 if (result.ContainsKey(tHash))
                 {
                     result[tHash].tags.AddRange(tagsData[tagID].tags);
@@ -110,7 +148,8 @@ namespace KingmakerPortraitManager
     {
 		//TODO: Tag management
 
-		public static List<PortraitData> LoadAllCustomPortraits()
+        //Modified LoadAllCustomPortraits from the game. Added skipping default portraits
+		public static List<PortraitData> LoadAllCustomPortraits(Boolean skipDefault)
 		{
 			string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
 			List<PortraitData> list = new List<PortraitData>();
@@ -118,13 +157,38 @@ namespace KingmakerPortraitManager
 			{
 				PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
 				portraitData.EnsureImages(false);
-				portraitData.CheckIfDefaultPortraitData();
+                portraitData.CheckIfDefaultPortraitData();
+                if (portraitData.IsDefault && skipDefault)
+                {
+                    continue;
+                }
 				list.Add(portraitData);
 				//TOOD: Tags
 			}
 			return list;
 		}
 
-	}
+        //Hashing function used in game. Used here for better compatability
+        public static int GetPseudoHash(Texture2D texture)
+        {
+            int num = 100;
+            int num2 = texture.width * texture.height;
+            int num3 = num2 / num;
+            Color32[] pixels = texture.GetPixels32();
+            int num4 = -2128831035;
+            for (int i = 0; i < num2 - 1; i += num3)
+            {
+                Color32 color = pixels[i];
+                num4 = (num4 ^ (int)color.r) * 16777619;
+                num4 = (num4 ^ (int)color.g) * 16777619;
+                num4 = (num4 ^ (int)color.b) * 16777619;
+            }
+            num4 += num4 << 13;
+            num4 ^= num4 >> 7;
+            num4 += num4 << 3;
+            num4 ^= num4 >> 17;
+            return num4 + (num4 << 5);
+        }
+    }
 
 }

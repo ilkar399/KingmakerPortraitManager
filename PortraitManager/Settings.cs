@@ -9,5 +9,6 @@ namespace KingmakerPortraitManager
     {
         public string localizationFileName;
         public string modPath;
+        public bool ToggleIgnoreDefaultPortraits;
     }
 }

@@ -31,6 +31,9 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 	remove tag
 	?remove tagless portraits
 
+*portrait folder 
+	add portrait pack merging?
+
 ## Install
 1. Download and install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21)
 2. Download the [mod](https://github.com/)

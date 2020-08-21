@@ -18,7 +18,8 @@ namespace KingmakerPortraitManager.Menu
     {
         public string Name => Local["Menu_Tab_PortraitList"];
         public int Priority => 100;
-        internal List<PortraitData> portraitDatas;
+        internal List<PortraitData> portraitsData;
+        internal Dictionary<string, TagData> tagsData;
         private int portraitIndex;
         private string[] portraitIDs;
         private PortraitData portraitData;
@@ -36,19 +37,19 @@ namespace KingmakerPortraitManager.Menu
                 {
                     if (portraitIDs == null)
                     {
-                        portraitDatas = new List<PortraitData>();
-                        portraitDatas = Helpers.LoadAllCustomPortraits();
-                        portraitIDs = portraitDatas.Select(type => type?.CustomId).ToArray();
+                        portraitsData = new List<PortraitData>();
+                        portraitsData = Helpers.LoadAllCustomPortraits(ToggleIgnoreDefaultPortraits);
+                        portraitIDs = portraitsData.Select(type => type?.CustomId).ToArray();
                         portraitIndex = 0;
-                        portraitData = portraitDatas[0];
+                        portraitData = portraitsData[0];
                     }
-                    modEntry.Logger.Log($"portraitDatas count: {portraitDatas.Count}");
+                    modEntry.Logger.Log($"portraitDatas count: {portraitsData.Count}");
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_UnloadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
                     portraitData = null;
                     portraitIDs = null;
-                    portraitDatas = null;
+                    portraitsData = null;
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitData"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
@@ -57,6 +58,7 @@ namespace KingmakerPortraitManager.Menu
             }
             if (portraitIDs != null)
             {
+                tagsData = Tags.LoadTagsData();
                 using (new GUILayout.HorizontalScope())
                 {
                     //1st column - portrait list
@@ -70,7 +72,7 @@ namespace KingmakerPortraitManager.Menu
                             GUIHelper.SelectionGrid(ref portraitIndex, portraitIDs, 1,
                                 () =>
                                 {
-                                    portraitData = portraitDatas[portraitIndex];
+                                    portraitData = portraitsData[portraitIndex];
                                 }, _buttonStyle, GUILayout.ExpandWidth(false));
                         }
                     }
@@ -78,9 +80,11 @@ namespace KingmakerPortraitManager.Menu
                     {
                         //TODO: labels hash (colored if it's wrong)
                         //TOOD: 
-                        //TODO: Buttons Open folder, Add tag, Remove tag, Clear tags, Save data
+                        //TODO: Buttons Open folder, Add tag, Clear tags, Save data. List of tags with an "X" that remove said tag
                         GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_IsCustom"], portraitData.IsCustom));
                         GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_PortraitID"], portraitData.CustomId));
+                        //Note: hash is calculated only based on the FulLengthPortrait
+                        GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_Hash"], Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture)));
                         if (GUILayout.Button(Local["Menu_PortraitList_Btn_OpenFolder"], _buttonStyle, GUILayout.ExpandWidth(false)))
                         {
                             if (CustomPortraitsManager.Instance == null)
@@ -88,6 +92,11 @@ namespace KingmakerPortraitManager.Menu
                                 return;
                             }
                             CustomPortraitsManager.Instance.OpenPortraitFolder(portraitData.CustomId);
+                        }
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label(Local["Menu_PortraitList_Lbl_tagMsg"]);
+
                         }
                         if (GUILayout.Button(Local["Menu_PortraitList_Btn_AddTag"], _buttonStyle, GUILayout.ExpandWidth(false)))
                         {

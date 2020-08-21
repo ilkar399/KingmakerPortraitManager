@@ -38,6 +38,9 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitList_Lbl_IsCustom", "Is Custom: {0}"},
             { "Menu_PortraitList_Lbl_PortraitImage", "Full portrait image"},
             { "Menu_PortraitList_Lbl_PortraitID", "Portrait ID: {0}"},
+            { "Menu_PortraitList_Lbl_Hash", "Portrait hash: {0}"},
+            { "Menu_PortraitList_Lbl_tagMsg", "Enter tag: "},
+            { "Menu_Settings_ToggleIgnoreDefaultPortraits","Ignore default portraits while processing"},
             { "Menu_All_Label_NotInGame", "Not in the game. Please start or load the game first." }
         };
 

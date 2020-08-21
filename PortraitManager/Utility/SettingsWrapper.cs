@@ -18,6 +18,12 @@ namespace KingmakerPortraitManager.Utility
             set => Mod.Settings.localizationFileName = value;
         }
 
+        public static bool ToggleIgnoreDefaultPortraits
+        {
+            get => Mod.Settings.ToggleIgnoreDefaultPortraits;
+            set => Mod.Settings.ToggleIgnoreDefaultPortraits = value;
+        }
+
     }
 
 }
