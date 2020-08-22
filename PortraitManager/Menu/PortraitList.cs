@@ -26,9 +26,8 @@ namespace KingmakerPortraitManager.Menu
         private string[] portraitIDs;
         private int _tagIndex;
         private string inputTagName;
-        //        private List<string> _tagList;
         internal string[] _tagList;
-        private TagData _tagData; 
+        internal TagData _tagData; 
         private PortraitData portraitData;
         private GUIStyle _buttonStyle;
         private GUIStyle _fixedStyle;
@@ -46,35 +45,37 @@ namespace KingmakerPortraitManager.Menu
             {
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_LoadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
-                    if (portraitIDs == null)
-                    {
-                        portraitsData = new List<PortraitData>();
-                        portraitsData = Helpers.LoadAllCustomPortraits(ToggleIgnoreDefaultPortraits);
-                        portraitIDs = portraitsData.Select(type => type?.CustomId).ToArray();
-                        portraitIndex = -1;
-                        portraitData = portraitsData[0];
-                        tagsData = Tags.LoadTagsData();
-                        _tagList = new string[] { };
-                    }
+                    portraitsData = new List<PortraitData>();
+                    portraitsData = Helpers.LoadAllCustomPortraits(ToggleIgnoreDefaultPortraits);
+                    portraitIDs = portraitsData.Select(type => type?.CustomId).ToArray();
+                    portraitIndex = -1;
+                    portraitData = null;
+                    tagsData = Tags.LoadTagsData();
+                    _tagList = new string[] { };
+                    _tagData = null;
+#if (DEBUG)
                     modEntry.Logger.Log($"portraitDatas count: {portraitsData.Count}");
+#endif
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_UnloadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
                     portraitData = null;
                     portraitIDs = null;
                     portraitsData = null;
+                    tagsData = null;
+                    _tagList = null;
+                    _tagData = null;
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitDataAll"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
                     if (tagsData != null)
                     {
-
+                        Tags.SaveTagsData(tagsData);
                     }
                 }
             }
             if (portraitIDs != null)
             {
-//                _tagList = new List<string>();
                 using (new GUILayout.HorizontalScope())
                 {
                     //1st column - portrait list
@@ -93,7 +94,10 @@ namespace KingmakerPortraitManager.Menu
                                             //TODO check overwrite settings
                                             _tagData.Hash = Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString();
                                             tagsData[portraitData.CustomId] = _tagData;
-                                        }
+#if (DEBUG)
+                                            modEntry.Logger.Log($"Saved {portraitData.CustomId}");
+#endif
+                                    }
                                     portraitData = portraitsData[portraitIndex];
                                     inputTagName = "";
                                     if (tagsData.ContainsKey(portraitData.CustomId))
@@ -108,109 +112,108 @@ namespace KingmakerPortraitManager.Menu
                                             portraitData.CustomId,
                                             new List<string>());
                                         _tagList = new string[] { };
- //                                       _tagList.Clear();
                                     }
                                     _tagIndex = -1;
-                                    modEntry.Logger.Log(portraitData.CustomId);
-                                    modEntry.Logger.Log(_tagList.Length.ToString());
                                 }, _buttonStyle, GUILayout.ExpandWidth(false));
                         }
                     }
-                    using (new GUILayout.VerticalScope())
+                    if (portraitData != null)
                     {
-                        //TODO: labels hash (colored if it's wrong)
-                        //TOOD: 
-                        //TODO: Buttons Open folder, Add tag, Clear tags, Save data. List of tags with an "X" that remove said tag
-                        GUILayout.Label(Local["Menu_PortraitList_Lbl_tagList"]);
-                        if (_tagList.Length > 0)
+
+                        using (new GUILayout.VerticalScope())
                         {
-                            try
+                            //TODO: labels hash (colored if it's wrong)
+                            //TOOD: 
+                            //TODO: Buttons Open folder, Add tag, Clear tags, Save data. List of tags with an "X" that remove said tag
+                            GUILayout.Label(Local["Menu_PortraitList_Lbl_tagList"]);
+                            if (_tagList.Length > 0)
                             {
-                                //tag selection and removal
-                                GUIHelper.SelectionGrid(ref _tagIndex, _tagList, 2, () =>
+                                try
                                 {
-                                    if (_tagIndex >= 0 && _tagIndex < _tagData.tags.Count)
+                                    //tag selection and removal
+                                    GUIHelper.SelectionGrid(ref _tagIndex, _tagList, 2, () =>
                                     {
-                                        //                                        _tagList.RemoveAt(_tagIndex);
-                                        _tagData.tags.RemoveAt(_tagIndex);
-                                        _tagList = Helpers.RemoveIndices(_tagList, _tagIndex);
-                                        modEntry.Logger.Log(_tagList.Length.ToString());
-                                        _tagIndex = -1;
-                                    }
-                                }, _buttonStyle, GUILayout.ExpandWidth(false));
-                            }
-                            catch (Exception e)
-                            {
-                                modEntry.Logger.Error(e.StackTrace);
-                                throw e;
-                            }
-                        }
-                        GUILayout.Label(Local["Menu_PortraitList_Lbl_tagMsg"]);
-                        using (new GUILayout.HorizontalScope())
-                        {
-                            GUIHelper.TextField(ref inputTagName, _fixedStyle);
-                            if (GUILayout.Button(Local["Menu_PortraitList_Btn_AddTag"], _buttonStyle, GUILayout.ExpandWidth(false)))
-                            {
-                                if (inputTagName != "")
+                                        if (_tagIndex >= 0 && _tagIndex < _tagData.tags.Count)
+                                        {
+                                            _tagData.tags.RemoveAt(_tagIndex);
+                                            _tagList = Helpers.RemoveIndices(_tagList, _tagIndex);
+                                            _tagIndex = -1;
+                                        }
+                                    }, _fixedStyle, GUILayout.ExpandWidth(false));
+                                }
+                                catch (Exception e)
                                 {
-                                    _tagData.tags.Add(inputTagName.ToLower());
-                                    _tagList.AddItem(inputTagName.ToLower());
+                                    modEntry.Logger.Error(e.StackTrace);
+                                    throw e;
                                 }
                             }
-                        }
-                        if (GUILayout.Button(Local["Menu_PortraitList_Btn_ClearTags"], _fixedStyle, GUILayout.ExpandWidth(false)))
-                        {
-                            _tagData.tags.Clear();
-                            _tagList = new string[] { };
-                            inputTagName = "";
-                            _tagIndex = -1;
-                        }
-                        if (GUILayout.Button(Local["Menu_PortraitList_Btn_CancelPortrait"], _fixedStyle, GUILayout.ExpandWidth(false)))
-                        {
-                            if (tagsData.ContainsKey(portraitData.CustomId))
+                            GUILayout.Label(Local["Menu_PortraitList_Lbl_tagMsg"]);
+                            using (new GUILayout.HorizontalScope())
                             {
-                                _tagData = tagsData[portraitData.CustomId];
-                                _tagList = _tagData.tags.ToArray(); ;
+                                GUIHelper.TextField(ref inputTagName, _fixedStyle);
+                                if (GUILayout.Button(Local["Menu_PortraitList_Btn_AddTag"], _buttonStyle, GUILayout.ExpandWidth(false)))
+                                {
+                                    if (inputTagName != "" && !(_tagData.tags.Contains(inputTagName.ToLower())))
+                                    {
+                                        _tagData.tags.Add(inputTagName.ToLower());
+                                        _tagList = _tagList.Concat(new string[] { inputTagName.ToLower() }).ToArray();
+                                    }
+                                }
+                            }
+                            if (GUILayout.Button(Local["Menu_PortraitList_Btn_ClearTags"], _fixedStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                _tagData.tags.Clear();
+                                _tagList = new string[] { };
+                                inputTagName = "";
+                                _tagIndex = -1;
+                            }
+                            if (GUILayout.Button(Local["Menu_PortraitList_Btn_CancelPortrait"], _fixedStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                if (tagsData.ContainsKey(portraitData.CustomId))
+                                {
+                                    _tagData = tagsData[portraitData.CustomId];
+                                    _tagList = _tagData.tags.ToArray(); ;
+                                }
+                                else
+                                {
+                                    _tagData = new TagData(
+                                        Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
+                                        portraitData.CustomId,
+                                        new List<string>());
+                                    _tagList = new string[] { };
+                                }
+                            }
+                            if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitData"], _fixedStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                _tagData.SaveData();
+                            }
+                            GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_IsCustom"], portraitData.IsCustom));
+                            GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_PortraitID"], portraitData.CustomId));
+                            //Note: hash is calculated only based on the FulLengthPortrait
+                            GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_Hash"], Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture)));
+                            if (GUILayout.Button(Local["Menu_PortraitList_Btn_OpenFolder"], _fixedStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                if (CustomPortraitsManager.Instance == null)
+                                {
+                                    return;
+                                }
+                                CustomPortraitsManager.Instance.OpenPortraitFolder(portraitData.CustomId);
+                            }
+                        }
+                        using (new GUILayout.VerticalScope())
+                        {
+                            //TODO: all 3 images or only 1? AreaScopes?
+                            Texture tex = portraitData.FullLengthPortrait.texture;
+                            if (tex)
+                            {
+                                GUILayout.Label(Local["Menu_PortraitList_Lbl_PortraitImage"]);
+                                GUILayout.Box(tex);
                             }
                             else
                             {
-                                _tagData = new TagData(
-                                    Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
-                                    portraitData.CustomId,
-                                    new List<string>());
-                                _tagList = new string[] { };
-                            }
-                        }
-                        if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitData"], _fixedStyle, GUILayout.ExpandWidth(false)))
-                        {
-                            _tagData.SaveData();
-                        }
-                        GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_IsCustom"], portraitData.IsCustom));
-                        GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_PortraitID"], portraitData.CustomId));
-                        //Note: hash is calculated only based on the FulLengthPortrait
-                        GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_Hash"], Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture)));
-                        if (GUILayout.Button(Local["Menu_PortraitList_Btn_OpenFolder"], _fixedStyle, GUILayout.ExpandWidth(false)))
-                        {
-                            if (CustomPortraitsManager.Instance == null)
-                            {
+                                modEntry.Logger.Error("Error getting portrait texture");
                                 return;
                             }
-                            CustomPortraitsManager.Instance.OpenPortraitFolder(portraitData.CustomId);
-                        }
-                    }
-                    using (new GUILayout.VerticalScope())
-                    {
-                        //TODO: all 3 images or only 1? AreaScopes.
-                        Texture tex = portraitData.FullLengthPortrait.texture;
-                        if (tex)
-                        {
-                            GUILayout.Label(Local["Menu_PortraitList_Lbl_PortraitImage"]);
-                            GUILayout.Box(tex);
-                        }
-                        else
-                        {
-                            modEntry.Logger.Error("Error getting portrait texture");
-                            return;
                         }
                     }
                 }

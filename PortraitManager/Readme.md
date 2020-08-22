@@ -1,7 +1,12 @@
 ﻿# KingmakerPortraitManager
 This mod is designed to provide a way of better portrait management in Pathfinder Kingmaker.
 ##TODO
+*next
+	filters
 *tests
+*PortraitList ui
+	Don't load all portraits?
+
 *settings
 	enable/disable injections
 	enable/disable UI injections
@@ -32,7 +37,9 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 	?remove tagless portraits
 
 *portrait folder 
-	add portrait pack merging?
+	add portrait pack merging
+	add ppack export/import
+	tagdata is saved in separate folder
 
 ## Install
 1. Download and install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21)

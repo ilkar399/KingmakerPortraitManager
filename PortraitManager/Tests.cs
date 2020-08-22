@@ -38,7 +38,7 @@ namespace KingmakerPortraitManager
 
         public static bool TestTagIO()
         {
-            //TODO: remove files after completion
+            //TODO: remove files after the test completion
             foreach(TagData value in testData1.Values)
             {
                 value.SaveData();

@@ -221,6 +221,7 @@ namespace KingmakerPortraitManager
 
             return newIndicesArray;
         }
+
     }
 
 }
