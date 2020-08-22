@@ -94,6 +94,7 @@ namespace KingmakerPortraitManager
 
     class Tags
     {
+        //Load all tags from tag directory
         public static Dictionary<string, TagData> LoadTagsData()
         {
             var result = new Dictionary<string, TagData>();
@@ -119,6 +120,16 @@ namespace KingmakerPortraitManager
                 return null;
             }
             return result;
+        }
+
+        //Save tags all tags data
+        //TOOD? add ignoring default portraits?
+        public static void SaveTagsData(Dictionary<string,TagData> tagsData)
+        {
+            foreach (TagData tagData in tagsData.Values)
+            {
+                tagData.SaveData();
+            }
         }
 
         //Converting from the {customId,tagData} dictionary to the {hash,tagData} one
@@ -188,6 +199,27 @@ namespace KingmakerPortraitManager
             num4 += num4 << 3;
             num4 ^= num4 >> 17;
             return num4 + (num4 << 5);
+        }
+
+        //Helper function to remove string array element at RemoveAt
+        public static string[] RemoveIndices(string [] IndicesArray, int RemoveAt)
+        {
+            string[] newIndicesArray = new string[IndicesArray.Length - 1];
+
+            int i = 0;
+            int j = 0;
+            while (i < IndicesArray.Length)
+            {
+                if (i != RemoveAt)
+                {
+                    newIndicesArray[j] = IndicesArray[i];
+                    j++;
+                }
+
+                i++;
+            }
+
+            return newIndicesArray;
         }
     }
 

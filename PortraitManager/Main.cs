@@ -26,7 +26,6 @@ namespace KingmakerPortraitManager
             Mod = new ModManager<Core, Settings>();
             Menu = new MenuManager();
             modEntry.OnToggle = OnToggle;
-            modEntry.OnToggle = OnToggle;
 #if (DEBUG)
             modEntry.OnUnload = Unload;
             return true;

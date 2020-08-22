@@ -31,6 +31,8 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitList_Btn_LoadPortraits", "Load Portraits"},
             { "Menu_PortraitList_Btn_OpenPortraitFolder", "Open Portrait Folder"},
             { "Menu_PortraitList_Btn_SavePortraitData", "Save Portrait Data"},
+            { "Menu_PortraitList_Btn_CancelPortrait", "Cancel changes"},
+            { "Menu_PortraitList_Btn_SavePortraitDataAll", "Save All Portrait Data"},
             { "Menu_PortraitList_Btn_OpenFolder", "Open Portrait Folder"},
             { "Menu_PortraitList_Btn_AddTag", "Add Tag"},
             { "Menu_PortraitList_Btn_RemoveTag", "Remove Tag"},
@@ -39,7 +41,8 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitList_Lbl_PortraitImage", "Full portrait image"},
             { "Menu_PortraitList_Lbl_PortraitID", "Portrait ID: {0}"},
             { "Menu_PortraitList_Lbl_Hash", "Portrait hash: {0}"},
-            { "Menu_PortraitList_Lbl_tagMsg", "Enter tag: "},
+            { "Menu_PortraitList_Lbl_tagMsg", "Add tag:"},
+            { "Menu_PortraitList_Lbl_tagList", "List of tags (click to remove):"},
             { "Menu_Settings_ToggleIgnoreDefaultPortraits","Ignore default portraits while processing"},
             { "Menu_All_Label_NotInGame", "Not in the game. Please start or load the game first." }
         };
