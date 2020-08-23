@@ -23,11 +23,16 @@ namespace KingmakerPortraitManager
 
         public static bool TestLoadAllCustomPortraits()
         {
-            List<PortraitData> portraitDatas = new List<PortraitData>();
-            portraitDatas = Helpers.LoadAllCustomPortraits(false);
-            Main.Mod.Log($"LoadAllCustomPortraits count: {portraitDatas.Count}");
-            bool result = (portraitDatas.Count > 0);
-            portraitDatas = null;
+            var tagsData = Tags.LoadTagsData();
+            var allPortraitsData = new Dictionary<string, TagData>();
+            allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, false);
+            var portraitIDs = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
+            PortraitData portraitData;
+            foreach (string portraitID in portraitIDs)
+                portraitData = Helpers.LoadPortraitData(allPortraitsData[portraitID].CustomId);
+            Main.Mod.Log($"LoadAllCustomPortraits count: {allPortraitsData.Count}");
+            bool result = (allPortraitsData.Count > 0);
+            allPortraitsData = null;
             if (result) {
                 Main.Mod.Log("TestLoadAllCustomPortraits success");
                 return true;
@@ -53,12 +58,29 @@ namespace KingmakerPortraitManager
             else return false;
         }
 
+        public static bool TestAllTagsList()
+        {
+            var AllTagsFilter = Tags.AllTagsFilter(Tags.LoadTagsData());
+            Main.Mod.Log($"TestAllTagsList: {string.Join(", ", AllTagsFilter.ToArray())}");
+            return true;
+        }
+
+        public static void TestCleanup()
+        {
+            foreach (string k in testData1.Keys)
+            {
+                File.Delete(ModPath + $"/tags/{k}.json");
+            }
+        }
+
         public static bool AllTests()
         {
             //TODO
             bool result = true;
             result = result && TestLoadAllCustomPortraits();
             result = result && TestTagIO();
+            result = result && TestAllTagsList();
+            TestCleanup();
             return result;
         }
     }

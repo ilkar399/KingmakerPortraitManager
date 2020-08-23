@@ -13,7 +13,10 @@ using UnityEngine;
 using TinyJson;
 using Kingmaker.EntitySystem.Persistence.JsonUtility;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
-
+using Kingmaker.UI._ConsoleUI.CombatLog;
+using Kingmaker.EntitySystem;
+using Kingmaker.Utility;
+using Kingmaker.UI.EndlessGameOver;
 
 namespace KingmakerPortraitManager
 {
@@ -21,8 +24,8 @@ namespace KingmakerPortraitManager
     [Serializable]
     public class TagData
     {
-        public string Hash;
-        public string CustomId;
+        public string Hash { get; set; }
+        public string CustomId { get; set; }
         public List<String> tags;
 
         public TagData(string Hash,string CustomId, List<string> tags)
@@ -132,6 +135,14 @@ namespace KingmakerPortraitManager
             }
         }
 
+        public static Dictionary<string,bool> AllTagsFilter(Dictionary<string, TagData> tagsData)
+        {
+            Dictionary<string,bool> result = new Dictionary<string,bool>();
+            result = tagsData.SelectMany(tagItem => tagItem.Value.tags).Distinct().ToDictionary(p => p, p => false);
+            //TODO add recent
+            return result;
+        }
+
         //Converting from the {customId,tagData} dictionary to the {hash,tagData} one
         public static  Dictionary<string,TagData> HashDictionary(Dictionary<string,TagData> tagsData, Boolean SkipBase)
         {
@@ -155,11 +166,75 @@ namespace KingmakerPortraitManager
         }
     }
 
-    class Helpers
+    static class Helpers
     {
-		//TODO: Tag management
+        //Filter portraits based on filter selections
+        //If no tag selected, returns all
+        public static string[] FilterPortraitIDs(string filterName,
+            bool filterValue,
+            Dictionary<string,TagData> allPortraitsData,
+            Dictionary<string,bool> tagListAll)
+        {
+            string[] result = new string[] { };
+            tagListAll[filterName] = filterValue;
+            if (!tagListAll.ContainsValue(true))
+            {
+                result = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
+                return result;
+            }
+            var filteredTags = tagListAll.Where(p => p.Value).Select(kvp => kvp.Key).ToList();
+            result = allPortraitsData.Where(kvp => {
+                bool tresult = false;
+                foreach (string filteredTag in filteredTags)
+                {
+                    if (kvp.Value.tags.Contains(filteredTag)) return true;
+                }
+                return tresult;
+            }).Select(kvp => kvp.Value.CustomId).ToArray();
+            return result;
+        }
 
-        //Modified LoadAllCustomPortraits from the game. Added skipping default portraits
+        //Load all tags for all portraits in folder
+        public static Dictionary<string,TagData> LoadAllPortraitsTags(Dictionary<string,TagData> customTags,Boolean skipDefault)
+        {
+            string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
+            Dictionary<string,TagData> result = new Dictionary<string, TagData>();
+            for (int i = 0; i < existingCustomPortraitIds.Length; i++)
+            {
+                PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
+                portraitData.EnsureImages(false);
+                portraitData.CheckIfDefaultPortraitData();
+                if (portraitData.IsDefault && skipDefault)
+                {
+                    continue;
+                }
+                List<string> tagList;
+                if (customTags.ContainsKey(portraitData.CustomId))
+                {
+                    tagList = new List<string>(customTags[portraitData.CustomId].tags);
+                }
+                else
+                {
+                    tagList = new List<string>();
+                }
+                 TagData resultTag = new TagData(GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
+                        portraitData.CustomId, tagList);
+                result[resultTag.CustomId] = resultTag;
+                portraitData = null;
+            }
+            return result;
+        }
+
+        //Load portrait data for 1 ID
+        public static PortraitData LoadPortraitData(string customID)
+        {
+            PortraitData result = new PortraitData(customID);
+            result.EnsureImages(false);
+            return result;
+        }
+
+
+        //Modified LoadAllCustomPortraits from the game. Added skipping default portraits. Not in use now
 		public static List<PortraitData> LoadAllCustomPortraits(Boolean skipDefault)
 		{
 			string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
@@ -174,7 +249,6 @@ namespace KingmakerPortraitManager
                     continue;
                 }
 				list.Add(portraitData);
-				//TOOD: Tags
 			}
 			return list;
 		}

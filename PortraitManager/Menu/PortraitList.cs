@@ -13,6 +13,9 @@ using static KingmakerPortraitManager.Utility.SettingsWrapper;
 using Kingmaker.Blueprints;
 using Kingmaker.Utility;
 using HarmonyLib;
+using Kingmaker.UI._ConsoleUI.CombatLog;
+using System.Security.Cryptography;
+using Kingmaker.UI.SettingsUI;
 
 namespace KingmakerPortraitManager.Menu
 {
@@ -20,8 +23,10 @@ namespace KingmakerPortraitManager.Menu
     {
         public string Name => Local["Menu_Tab_PortraitList"];
         public int Priority => 100;
-        internal List<PortraitData> portraitsData;
+        public static string[] ReservedTags = { "", "all", "recent"};
+        internal Dictionary<string,TagData> allPortraitsData;
         internal Dictionary<string, TagData> tagsData;
+        public Dictionary<string,bool> tagListAll;
         private int portraitIndex;
         private string[] portraitIDs;
         private int _tagIndex;
@@ -31,8 +36,7 @@ namespace KingmakerPortraitManager.Menu
         private PortraitData portraitData;
         private GUIStyle _buttonStyle;
         private GUIStyle _fixedStyle;
-        private Vector2 _scrollPosition;
-        
+        private Vector2 _scrollPosition;      
 
         public void OnGUI(UnityModManager.ModEntry modEntry)
         {
@@ -41,28 +45,31 @@ namespace KingmakerPortraitManager.Menu
                 _buttonStyle = new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft };
             if (_fixedStyle == null)
                 _fixedStyle = new GUIStyle(GUI.skin.button) { fixedWidth = 150f, wordWrap = true };
+            //Overall list operations
             using (new GUILayout.HorizontalScope())
             {
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_LoadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
-                    portraitsData = new List<PortraitData>();
-                    portraitsData = Helpers.LoadAllCustomPortraits(ToggleIgnoreDefaultPortraits);
-                    portraitIDs = portraitsData.Select(type => type?.CustomId).ToArray();
+                    tagsData = Tags.LoadTagsData();
+                    allPortraitsData = new Dictionary<string, TagData>();
+                    allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData,ToggleIgnoreDefaultPortraits);
+                    portraitIDs = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
                     portraitIndex = -1;
                     portraitData = null;
-                    tagsData = Tags.LoadTagsData();
+                    tagListAll = Tags.AllTagsFilter(tagsData);
                     _tagList = new string[] { };
                     _tagData = null;
 #if (DEBUG)
-                    modEntry.Logger.Log($"portraitDatas count: {portraitsData.Count}");
+                    modEntry.Logger.Log($"portraitDatas count: {allPortraitsData.Count}");
 #endif
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_UnloadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
+                    allPortraitsData = null;
                     portraitData = null;
                     portraitIDs = null;
-                    portraitsData = null;
                     tagsData = null;
+                    tagListAll = null;
                     _tagList = null;
                     _tagData = null;
                 }
@@ -74,15 +81,56 @@ namespace KingmakerPortraitManager.Menu
                     }
                 }
             }
+            //Filter portrait list by tags
+            if (tagListAll != null)
+            {
+                GUILayout.Label(Local["Menu_PortraitList_Lbl_Filters"]);
+                if (GUILayout.Button(Local["Menu_PortraitList_Btn_AllTags"],_fixedStyle,GUILayout.ExpandWidth(false)))
+                 {
+                    portraitIDs = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
+                    tagListAll = tagListAll.ToDictionary(p => p.Key, p => false);
+                    portraitIndex = -1;
+                    portraitData = null;
+                    _tagList = new string[] { };
+                    _tagData = null;
+                }
+                using (new GUILayout.HorizontalScope())
+                {
+                    var filterKeys = new List<string> (tagListAll.Keys);
+                    foreach (string filterName in filterKeys)
+                    {
+                        bool FilterValue = tagListAll[filterName];
+                        GUIHelper.ToggleButton(ref FilterValue, filterName,() =>
+                        {
+                            portraitIDs = Helpers.FilterPortraitIDs(filterName, FilterValue, allPortraitsData, tagListAll);
+                            portraitIndex = -1;
+                            portraitData = null;
+                            _tagList = new string[] { };
+                            _tagData = null;
+                        },() =>
+                        {
+                            portraitIDs = Helpers.FilterPortraitIDs(filterName, FilterValue, allPortraitsData, tagListAll);
+                            portraitIndex = -1;
+                            portraitData = null;
+                            _tagList = new string[] { };
+                            _tagData = null;
+                        },
+                        _fixedStyle);
+                        tagListAll[filterName] = FilterValue;
+                    }
+                }
+            }
+            //Portraits list
+            //1st column - portrait list
+            //2rd column - buttons. Open folder. Tags. Clear tags.
+            //3nd column - portrait image
             if (portraitIDs != null)
             {
                 using (new GUILayout.HorizontalScope())
                 {
-                    //1st column - portrait list
-                    //2rd column - buttons. Open folder. Tags. Clear tags.
-                    //3nd column - portrait image
-                    using (new GUILayout.VerticalScope(GUILayout.ExpandWidth(false)))
+                    using (new GUILayout.VerticalScope(GUILayout.Width(120)))
                     {
+                        GUILayout.Label(Local["Menu_PortraitList_Lbl_PortraitListHeader"]);
                         using (var ScrollView = new GUILayout.ScrollViewScope(_scrollPosition))
                         {
                             _scrollPosition = ScrollView.scrollPosition;
@@ -90,15 +138,13 @@ namespace KingmakerPortraitManager.Menu
                                 () =>
                                 {
                                     if (_tagData != null)
-                                        {
-                                            //TODO check overwrite settings
-                                            _tagData.Hash = Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString();
-                                            tagsData[portraitData.CustomId] = _tagData;
-#if (DEBUG)
-                                            modEntry.Logger.Log($"Saved {portraitData.CustomId}");
-#endif
+                                    {
+                                        //TODO check overwrite settings
+ //                                       _tagData.Hash = allPortraitsData.Find(tag => tag.CustomId == portraitData.CustomId).Hash;
+                                        _tagData.Hash = Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString();
+                                        tagsData[portraitData.CustomId] = _tagData;
                                     }
-                                    portraitData = portraitsData[portraitIndex];
+                                    portraitData = Helpers.LoadPortraitData(allPortraitsData[portraitIDs[portraitIndex]].CustomId);
                                     inputTagName = "";
                                     if (tagsData.ContainsKey(portraitData.CustomId))
                                     {
@@ -120,7 +166,7 @@ namespace KingmakerPortraitManager.Menu
                     if (portraitData != null)
                     {
 
-                        using (new GUILayout.VerticalScope())
+                        using (new GUILayout.VerticalScope(GUILayout.Width(350)))
                         {
                             //TODO: labels hash (colored if it's wrong)
                             //TOOD: 
@@ -153,7 +199,7 @@ namespace KingmakerPortraitManager.Menu
                                 GUIHelper.TextField(ref inputTagName, _fixedStyle);
                                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_AddTag"], _buttonStyle, GUILayout.ExpandWidth(false)))
                                 {
-                                    if (inputTagName != "" && !(_tagData.tags.Contains(inputTagName.ToLower())))
+                                    if (Array.IndexOf(ReservedTags,inputTagName.ToLower())<0 && !(_tagData.tags.Contains(inputTagName.ToLower())))
                                     {
                                         _tagData.tags.Add(inputTagName.ToLower());
                                         _tagList = _tagList.Concat(new string[] { inputTagName.ToLower() }).ToArray();
@@ -169,19 +215,12 @@ namespace KingmakerPortraitManager.Menu
                             }
                             if (GUILayout.Button(Local["Menu_PortraitList_Btn_CancelPortrait"], _fixedStyle, GUILayout.ExpandWidth(false)))
                             {
-                                if (tagsData.ContainsKey(portraitData.CustomId))
-                                {
-                                    _tagData = tagsData[portraitData.CustomId];
-                                    _tagList = _tagData.tags.ToArray(); ;
-                                }
-                                else
-                                {
-                                    _tagData = new TagData(
-                                        Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
-                                        portraitData.CustomId,
-                                        new List<string>());
-                                    _tagList = new string[] { };
-                                }
+                                _tagData = new TagData(
+                                    _tagData.Hash,
+                                    _tagData.CustomId,
+                                    new List<string>(allPortraitsData[portraitData.CustomId].tags));
+                                modEntry.Logger.Log(string.Join(", ",_tagData.tags.ToArray()));
+                                _tagList = _tagData.tags.ToArray();
                             }
                             if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitData"], _fixedStyle, GUILayout.ExpandWidth(false)))
                             {
@@ -207,6 +246,7 @@ namespace KingmakerPortraitManager.Menu
                             if (tex)
                             {
                                 GUILayout.Label(Local["Menu_PortraitList_Lbl_PortraitImage"]);
+//                                GUI.DrawTexture(new Rect(10, 10, 346, 512), tex, ScaleMode.ScaleToFit, true, 10.0F);
                                 GUILayout.Box(tex);
                             }
                             else

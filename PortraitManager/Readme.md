@@ -2,7 +2,9 @@
 This mod is designed to provide a way of better portrait management in Pathfinder Kingmaker.
 ##TODO
 *next
-	filters
+	injections?
+	add default tags
+	recent
 *tests
 *PortraitList ui
 	Don't load all portraits?
@@ -23,6 +25,7 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 	stored in modDirectory/tags/
 	json format in storage, plaintext in portrait directory
 	only jsonstring allowed, converted to lowercase
+	reserved tags: all, recent, "".
 	tags are loaded into dictionary {string, List<string>}
 *filters
 	Filter is a List<string> of portraitIDs that won't be shown in UI.
