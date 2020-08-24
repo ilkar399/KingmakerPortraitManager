@@ -37,7 +37,7 @@ namespace KingmakerPortraitManager
 
 
         //Serializer and deserializer.
-        public void SaveData()
+        public void SaveData(bool isExport)
         {
             var JsonSettings = new JsonSerializerSettings
             {
@@ -45,15 +45,24 @@ namespace KingmakerPortraitManager
                 TypeNameHandling = TypeNameHandling.Auto,
                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize
             };
+            string savepath = "";
+            if (isExport)
+            {
+                savepath = ModPath + @"/Export/tags/";
+            }
+            else
+            {
+                savepath = ModPath + @"/tags/";
+            }
             DefaultJsonSettings.Initialize();
             try
             {
-                if (!Directory.Exists(ModPath + @"/tags/"))
+                if (!Directory.Exists(savepath))
                 {
-                    Directory.CreateDirectory(ModPath + @"/tags/");
+                    Directory.CreateDirectory(savepath);
                 }
                 JsonSerializer serializer = JsonSerializer.Create(JsonSettings);
-                using (StreamWriter sw = new StreamWriter(ModPath + $"/tags/{this.CustomId}.json"))
+                using (StreamWriter sw = new StreamWriter(savepath + $"{this.CustomId}.json"))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {   
                     serializer.Serialize(writer, this);
@@ -62,7 +71,10 @@ namespace KingmakerPortraitManager
             catch (Exception e)
             {
                 Main.Mod.Log($"Error processing {this.CustomId}");
+#if (DEBUG)
                 Main.Mod.Log(e.StackTrace);
+#endif
+                throw e;
             }
         }
 
@@ -127,14 +139,15 @@ namespace KingmakerPortraitManager
 
         //Save tags all tags data
         //TOOD? add ignoring default portraits?
-        public static void SaveTagsData(Dictionary<string,TagData> tagsData)
+        public static void SaveTagsData(Dictionary<string,TagData> tagsData, bool isExport)
         {
             foreach (TagData tagData in tagsData.Values)
             {
-                tagData.SaveData();
+                tagData.SaveData(isExport);
             }
         }
 
+        //Get an initial filter tags dictionary based on all tag data
         public static Dictionary<string,bool> AllTagsFilter(Dictionary<string, TagData> tagsData)
         {
             Dictionary<string,bool> result = new Dictionary<string,bool>();
@@ -253,6 +266,66 @@ namespace KingmakerPortraitManager
 			return list;
 		}
 
+        //Export portraits + tags from game portrait folder to ModPath/Export
+        //TODO: Localized messages
+        public static string ExportPortraits(Dictionary <string,TagData> currentPortraitTagsData)
+        {
+            string result = "";
+            int TagErrorCount = 0;
+            int PortraitErrorCount = 0;
+            string portraitRootFolder = Path.Combine(Application.persistentDataPath,BlueprintRoot.Instance.CharGen.PortraitFolderName);
+            string exportRootFolder = Path.Combine(ModPath,"Export");
+            if (Directory.Exists(exportRootFolder))
+                try 
+                {
+                    Directory.Delete(exportRootFolder, true);
+                    Directory.CreateDirectory(exportRootFolder);
+                    Directory.CreateDirectory(Path.Combine(exportRootFolder,"Portraits"));
+                    Directory.CreateDirectory(Path.Combine(exportRootFolder,"tags"));
+                }
+                catch
+                {
+                    Main.Mod.Error("Error initializing export folder.");
+                    return "Error initializing export folder.";
+                }
+            
+            Dictionary<string, TagData> filteredTagData = currentPortraitTagsData.Where(
+                           kvp => kvp.Value.tags.Count() > 0).ToDictionary(kvp => kvp.Key, kvp=> kvp.Value);
+            foreach (TagData tag in filteredTagData.Values)
+            {
+                try
+                {
+                    tag.SaveData(true);
+                }
+                catch
+                {
+                    TagErrorCount++;
+                }
+            }
+            foreach (string customId in currentPortraitTagsData.Keys)
+            {
+                try
+                {
+                    DirectoryCopy(Path.Combine(portraitRootFolder,customId),Path.Combine(exportRootFolder,"Portraits",customId),true);
+                }
+                catch (Exception e)
+                {
+#if (DEBUG)
+                    Main.Mod.Log(e.StackTrace);
+#endif
+                    Main.Mod.Error("Error exporting " + customId);
+                    PortraitErrorCount++;
+                }
+            }
+            if ((TagErrorCount > 0) || (PortraitErrorCount > 0))
+            {
+                result = $"There were errors during portrait export. Tag processing errors: {TagErrorCount}. " +
+                    $"Portrait processing errors: {PortraitErrorCount}";
+            }
+            else result = "Data exported sucessfully.";
+            return result;
+        }
+
         //Hashing function used in game. Used here for better compatability
         public static int GetPseudoHash(Texture2D texture)
         {
@@ -296,6 +369,44 @@ namespace KingmakerPortraitManager
             return newIndicesArray;
         }
 
+        //Copy directory (example from msdn) 
+        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            // If the destination directory doesn't exist, create it.
+            if (!Directory.Exists(destDirName))
+            {
+                Directory.CreateDirectory(destDirName);
+            }
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string temppath = Path.Combine(destDirName, file.Name);
+                file.CopyTo(temppath, false);
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string temppath = Path.Combine(destDirName, subdir.Name);
+                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+                }
+            }
+        }
     }
 
 }

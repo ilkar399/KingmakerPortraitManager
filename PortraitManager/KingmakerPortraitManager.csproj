@@ -72,6 +72,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Menu\PortraitPacks.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Core.cs" />
@@ -90,6 +91,10 @@
     <Content Include="LICENSE.txt" />
     <Content Include="Settings.xml" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="HarmonyPatches\" />
+    <Folder Include="UI\" />
   </ItemGroup>
   <Import Project="..\..\KingmakerModMaker\ModMaker\ModMaker.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

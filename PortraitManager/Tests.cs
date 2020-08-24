@@ -46,7 +46,7 @@ namespace KingmakerPortraitManager
             //TODO: remove files after the test completion
             foreach(TagData value in testData1.Values)
             {
-                value.SaveData();
+                value.SaveData(false);
             }
             var testDict = new Dictionary<string, TagData>();
             testDict = Tags.LoadTagsData();

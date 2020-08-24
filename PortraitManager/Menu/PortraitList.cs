@@ -24,15 +24,15 @@ namespace KingmakerPortraitManager.Menu
         public string Name => Local["Menu_Tab_PortraitList"];
         public int Priority => 100;
         public static string[] ReservedTags = { "", "all", "recent"};
+        public static string[] portraitIDs;
         internal Dictionary<string,TagData> allPortraitsData;
         internal Dictionary<string, TagData> tagsData;
-        public Dictionary<string,bool> tagListAll;
+        private Dictionary<string,bool> tagListAll;
         private int portraitIndex;
-        private string[] portraitIDs;
         private int _tagIndex;
         private string inputTagName;
-        internal string[] _tagList;
-        internal TagData _tagData; 
+        private string[] _tagList;
+        private TagData _tagData; 
         private PortraitData portraitData;
         private GUIStyle _buttonStyle;
         private GUIStyle _fixedStyle;
@@ -48,6 +48,7 @@ namespace KingmakerPortraitManager.Menu
             //Overall list operations
             using (new GUILayout.HorizontalScope())
             {
+                GUILayout.Space(10f);
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_LoadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
                     tagsData = Tags.LoadTagsData();
@@ -77,7 +78,8 @@ namespace KingmakerPortraitManager.Menu
                 {
                     if (tagsData != null)
                     {
-                        Tags.SaveTagsData(tagsData);
+                        Tags.SaveTagsData(tagsData, false);
+                        tagListAll = Tags.AllTagsFilter(tagsData);
                     }
                 }
             }
@@ -224,7 +226,12 @@ namespace KingmakerPortraitManager.Menu
                             }
                             if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitData"], _fixedStyle, GUILayout.ExpandWidth(false)))
                             {
-                                _tagData.SaveData();
+                                _tagData.SaveData(false);
+                                tagsData[_tagData.CustomId] = new TagData(
+                                            _tagData.CustomId,
+                                            _tagData.Hash,
+                                            new List<string>(_tagData.tags));
+                                tagListAll = Tags.AllTagsFilter(tagsData);
                             }
                             GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_IsCustom"], portraitData.IsCustom));
                             GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_PortraitID"], portraitData.CustomId));

@@ -2,12 +2,14 @@
 This mod is designed to provide a way of better portrait management in Pathfinder Kingmaker.
 ##TODO
 *next
+	portrait pack import/export
 	injections?
+	CustomPortraitManager.GetExistingCustomPortraitIds
+
 	add default tags
 	recent
 *tests
 *PortraitList ui
-	Don't load all portraits?
 
 *settings
 	enable/disable injections
@@ -40,7 +42,6 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 	?remove tagless portraits
 
 *portrait folder 
-	add portrait pack merging
 	add ppack export/import
 	tagdata is saved in separate folder
 

@@ -27,6 +27,7 @@ namespace KingmakerPortraitManager
         {
             { "Menu_Tab_Settings", "Settings" },
             { "Menu_Tab_PortraitList", "Portrait List" },
+            { "Menu_Tab_PortraitPacks", "Portrait Pack Export/Import" },
             { "Menu_PortraitList_Btn_UnloadPortraits", "Unload Portraits"},
             { "Menu_PortraitList_Btn_LoadPortraits", "Load Portraits"},
             { "Menu_PortraitList_Btn_OpenPortraitFolder", "Open Portrait Folder"},
@@ -46,6 +47,18 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitList_Lbl_tagList", "List of tags (click to remove):"},
             { "Menu_PortraitList_Lbl_Filters","Filter portraits by:"},
             { "Menu_PortraitList_Lbl_PortraitListHeader","Portrait list by id:"},
+            { "Menu_PortraitPacks_Btn_LoadPortraits","Load Portraits"},
+            { "Menu_PortraitPacks_Btn_Export","Export all custom portraits"},
+            { "Menu_PortraitPacks_Btn_Import","Import all custom portraits from the selected folder"},
+            { "Menu_PortraitPacks_Lbl_CurrentData","Current portraits info:"},
+            { "Menu_PortraitPacks_Lbl_PortraitsTotal","Total non-default portraits: {0}"},
+            { "Menu_PortraitPacks_Lbl_PortraitsTagged","Tagged portraits: {0}"},
+            { "Menu_PortraitPacks_Lbl_PortraitsDuplicate","Duplicate portraits: {0}"},
+            { "Menu_PortraitPacks_Lbl_PortraitsError","Errors checking: {0}"},
+            { "Menu_PortraitPacks_Lbl_TagsTotal","Total tags: {0}"},
+            //TODO
+            { "Menu_PortraitPacks_Lbl_ExportHint","TODO. Portraits saved to the Exported directory. Portraits to one folder, tags to another. Add zip archiver?"},
+            { "Menu_PortraitPacks_Lbl_ImportHint","TODO."},
             { "Menu_Settings_ToggleIgnoreDefaultPortraits","Ignore default portraits while processing"},
             { "Menu_All_Label_NotInGame", "Not in the game. Please start or load the game first." }
         };
