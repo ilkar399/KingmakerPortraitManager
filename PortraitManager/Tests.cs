@@ -23,7 +23,7 @@ namespace KingmakerPortraitManager
 
         public static bool TestLoadAllCustomPortraits()
         {
-            var tagsData = Tags.LoadTagsData();
+            var tagsData = Tags.LoadTagsData(false);
             var allPortraitsData = new Dictionary<string, TagData>();
             allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, false);
             var portraitIDs = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
@@ -49,7 +49,7 @@ namespace KingmakerPortraitManager
                 value.SaveData(false);
             }
             var testDict = new Dictionary<string, TagData>();
-            testDict = Tags.LoadTagsData();
+            testDict = Tags.LoadTagsData(false);
             if (testDict != null)
             {
                 Main.Mod.Log("TestTagIO success");
@@ -60,7 +60,7 @@ namespace KingmakerPortraitManager
 
         public static bool TestAllTagsList()
         {
-            var AllTagsFilter = Tags.AllTagsFilter(Tags.LoadTagsData());
+            var AllTagsFilter = Tags.AllTagsFilter(Tags.LoadTagsData(false));
             Main.Mod.Log($"TestAllTagsList: {string.Join(", ", AllTagsFilter.ToArray())}");
             return true;
         }

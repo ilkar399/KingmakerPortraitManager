@@ -2,7 +2,7 @@
   "Id": "KingmakerPortraitManager",
   "DisplayName": "Pathfinder Portrait Manager",
   "Author": "Ilkar",
-  "Version": "0.0.1",
+  "Version": "0.0.2",
   "ManagerVersion": "0.22.0",
   "Requirements": [],
   "EntryMethod": "KingmakerPortraitManager.Main.Load"

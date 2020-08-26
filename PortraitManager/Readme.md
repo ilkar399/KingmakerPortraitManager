@@ -50,9 +50,52 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 3. Extract the archive and put the mod folder into 'Mods' folder of the Game (\Steam\steamapps\common\Pathfinder Kingmaker\Mods)
 4. Open the interface (Ctrl+f10)
 
+##Exporting and importing portraits
+Portraits are exported to the "Export" directory in the mod folder and imported from the "Import" directory. Portraits are stored in "Id" folders and tags - in a "tags" subdirectory, as json files with their names corresponding to portrait Ids.
+In the end, the mod folder structure should look like this:
+KingmakerPortraitManager
+│
+├── tags
+│   └── *.json
+│
+├── Export
+│   ├── tags
+│   │   └── *.json
+│   └── <PortraitID>
+│		└── Portrait images
+│
+└── Import
+    ├── tags
+    │   └── *.json
+    └── <PortraitID>
+		└── Portrait images
+
+
 ##Compilation notes
-1. Published assembly is required (add link to publisher)
-2. Folder structure
+Published assembly is required (add link to publisher)
+This project depends on [ModMaker](https://github.com/hsinyuhcan/KingmakerModMaker), you need both repos in the same folder, and a folder called `KingmakerLib` including the Dll files. The folder structure should look like:
+```
+Repos
+│
+├── KingmakerLib
+│   ├── UnityModManager
+│   │   ├── 0Harmony.dll.dll
+│   │   └── UnityModManager.dll
+│	├── Assembly-CSharp_publicized.dll
+│   └── *.dll
+│
+├── KingmakerModMaker
+│   ├── ModMaker
+│   │   └── ModMaker.shproj
+│   └── ModMaker.sln
+│
+└── PortraitManager
+    ├── PortraitManager
+    │   └── KingmakerPortraitManager.csproj
+    └── KingmakerPortraitManager.sln
+```
+
+
 
 ##Credits to 
 Spacehamster, Hambeard, Holic92, etc.

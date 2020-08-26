@@ -15,11 +15,12 @@ using Kingmaker.Blueprints;
 using Kingmaker;
 using Kingmaker.UI;
 using Kingmaker.Utility;
-using HarmonyLib;
+using static ModMaker.Utility.RichTextExtensions;
 using System.Security.Cryptography;
 using Kingmaker.UI.SettingsUI;
 using Kingmaker.UI.LevelUp;
 using Kingmaker.UI.LevelUp.Phase;
+using TinyJson;
 
 namespace KingmakerPortraitManager.Menu
 {
@@ -55,7 +56,7 @@ namespace KingmakerPortraitManager.Menu
                 GUILayout.Space(10f);
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_LoadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
-                    tagsData = Tags.LoadTagsData();
+                    tagsData = Tags.LoadTagsData(false);
                     allPortraitsData = new Dictionary<string, TagData>();
                     allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData,ToggleIgnoreDefaultPortraits);
                     portraitIDs = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
@@ -84,6 +85,7 @@ namespace KingmakerPortraitManager.Menu
                     if (tagsData != null)
                     {
                         Tags.SaveTagsData(tagsData, false);
+                        allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, ToggleIgnoreDefaultPortraits);
                         tagListAll = Tags.AllTagsFilter(tagsData);
                     }
                 }
@@ -108,7 +110,6 @@ namespace KingmakerPortraitManager.Menu
                     {
                         if (Game.Instance.UI.CharacterBuildController.Portrait != null) 
                         {
-                            modEntry.Logger.Log("Game.Instance.UI.CharacterBuildController.Portrait");
                             if (Game.Instance.UI.CharacterBuildController.Portrait.IsUnlocked)
                             {
                                 Game.Instance?.UI.CharacterBuildController.Portrait.PortraitSelector.HandleClickUpload(false);
@@ -125,6 +126,7 @@ namespace KingmakerPortraitManager.Menu
                         
                     }*/
                 }
+                //Portrait filters
                 using (new GUILayout.HorizontalScope())
                 {
                     var filterKeys = new List<string> (tagListAll.Keys);
@@ -179,7 +181,11 @@ namespace KingmakerPortraitManager.Menu
                                     inputTagName = "";
                                     if (tagsData.ContainsKey(portraitData.CustomId))
                                     {
-                                        _tagData = tagsData[portraitData.CustomId];
+                                        _tagData = new TagData(
+                                            Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
+                                            portraitData.CustomId,
+                                            tagsData[portraitData.CustomId].tags);
+//                                        _tagData = tagsData[portraitData.CustomId];
                                         _tagList = _tagData.tags.ToArray();
                                     }
                                     else
@@ -199,14 +205,29 @@ namespace KingmakerPortraitManager.Menu
 
                         using (new GUILayout.VerticalScope(GUILayout.Width(350)))
                         {
-                            //TODO: labels hash (colored if it's wrong)
-                            //TOOD: 
-                            GUILayout.Label(Local["Menu_PortraitList_Lbl_tagList"]);
-                            if (_tagList.Length > 0)
+                            GUILayout.Label(Local["Menu_PortraitList_Lbl_tagList"]);                            
+                            using (new GUILayout.HorizontalScope())
                             {
-                                try
+                                var allToggleTags = new List<string> (tagListAll.Keys);
+                                foreach (string toggleTagName in allToggleTags)
+                                {
+                                    bool tagToggleValue = _tagData.tags.Contains(toggleTagName);
+                                    GUIHelper.ToggleButton(ref tagToggleValue, toggleTagName,() =>
+                                    {
+                                        if (!_tagData.tags.Contains(toggleTagName))
+                                            _tagData.tags.Add(toggleTagName);
+                                    },() =>
+                                    {
+                                        if (_tagData.tags.Contains(toggleTagName))
+                                            _tagData.tags.Remove(toggleTagName);
+                                    },
+                                    _fixedStyle);
+                                }
+                            }
+                                 /*                                try
                                 {
                                     //tag selection and removal
+                                    //TODO - change to togglebutton iterator
                                     GUIHelper.SelectionGrid(ref _tagIndex, _tagList, 2, () =>
                                     {
                                         if (_tagIndex >= 0 && _tagIndex < _tagData.tags.Count)
@@ -221,8 +242,7 @@ namespace KingmakerPortraitManager.Menu
                                 {
                                     modEntry.Logger.Error(e.StackTrace);
                                     throw e;
-                                }
-                            }
+                                }*/
                             GUILayout.Label(Local["Menu_PortraitList_Lbl_tagMsg"]);
                             using (new GUILayout.HorizontalScope())
                             {
@@ -259,13 +279,20 @@ namespace KingmakerPortraitManager.Menu
                                             _tagData.CustomId,
                                             _tagData.Hash,
                                             new List<string>(_tagData.tags));
+                                allPortraitsData[_tagData.CustomId] = _tagData;
                                 tagListAll = Tags.AllTagsFilter(tagsData);
                             }
                             GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_IsCustom"], portraitData.IsCustom));
                             GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_PortraitID"], portraitData.CustomId));
                             //Note: hash is calculated only based on the FulLengthPortrait
-                            //TODO: use red color if hash is different between the tags and portrait one
-                            GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_Hash"], Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture)));
+                            string HashText = string.Format(Local["Menu_PortraitList_Lbl_Hash"], Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture));
+                            if (!tagsData.ContainsKey(portraitData.CustomId))
+                                GUILayout.Label(HashText);
+                            else
+                                if ((_tagData.Hash == tagsData[portraitData.CustomId].Hash))
+                                    GUILayout.Label(HashText);
+                                else
+                                    GUILayout.Label(HashText.Color(RGBA.red));
                             if (GUILayout.Button(Local["Menu_PortraitList_Btn_OpenFolder"], _fixedStyle, GUILayout.ExpandWidth(false)))
                             {
                                 if (CustomPortraitsManager.Instance == null)
@@ -275,6 +302,7 @@ namespace KingmakerPortraitManager.Menu
                                 CustomPortraitsManager.Instance.OpenPortraitFolder(portraitData.CustomId);
                             }
                         }
+                        
                         using (new GUILayout.VerticalScope())
                         {
                             //TODO: all 3 images or only 1? AreaScopes?

@@ -17,6 +17,7 @@ using Kingmaker.EntitySystem.Persistence.JsonUtility;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
 using Kingmaker.UI._ConsoleUI.CombatLog;
 using Kingmaker.EntitySystem;
+using Kingmaker.Enums;
 using Kingmaker.Utility;
 using Kingmaker.UI.EndlessGameOver;
 
@@ -112,16 +113,19 @@ namespace KingmakerPortraitManager
     class Tags
     {
         //Load all tags from tag directory
-        public static Dictionary<string, TagData> LoadTagsData()
+        public static Dictionary<string, TagData> LoadTagsData(Boolean isImport)
         {
             var result = new Dictionary<string, TagData>();
+            string LoadPath = ModPath;
+            if (isImport)
+                LoadPath = ModPath + @"/Import";
             try
             {
-                if (!Directory.Exists(ModPath + @"/tags/"))
+                if (!Directory.Exists(LoadPath + @"/tags/"))
                 {
-                    Directory.CreateDirectory(ModPath + @"/tags/");
+                    Directory.CreateDirectory(LoadPath + @"/tags/");
                 }
-                string[] tagFiles = Directory.GetFiles(ModPath + @"/tags/", "*.json");
+                string[] tagFiles = Directory.GetFiles(LoadPath + @"/tags/", "*.json");
                 foreach (string tagFile in tagFiles)
                 {
                     var tagData = TagData.LoadData(tagFile);
@@ -211,9 +215,10 @@ namespace KingmakerPortraitManager
         }
 
         //Load all tags for all portraits in folder
-        public static Dictionary<string,TagData> LoadAllPortraitsTags(Dictionary<string,TagData> customTags,Boolean skipDefault)
+        public static Dictionary<string,TagData> LoadAllPortraitsTags(Dictionary<string,TagData> customTags, Boolean skipDefault)
         {
             string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
+
             Dictionary<string,TagData> result = new Dictionary<string, TagData>();
             for (int i = 0; i < existingCustomPortraitIds.Length; i++)
             {
@@ -235,6 +240,41 @@ namespace KingmakerPortraitManager
                 }
                  TagData resultTag = new TagData(GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
                         portraitData.CustomId, tagList);
+                result[resultTag.CustomId] = resultTag;
+                portraitData = null;
+            }
+            return result;
+        }
+
+        //Test portraits and return available tags from the Import directory
+        public static Dictionary<string, TagData> ImportPortraitsTags(Dictionary<string, TagData> customTags, Boolean skipDefault)
+        {
+            Dictionary<string, TagData> result = new Dictionary<string, TagData>();
+            var existingCustomPortraitIdsList = Enumerable.ToList<string>(Enumerable.Select<string, string>(
+                Directory.GetDirectories(ModPath + @"/Import"), (string p) => new DirectoryInfo(p).Name)
+                );
+            existingCustomPortraitIdsList.Remove("tags");
+            string[] existingCustomPortraitIds = existingCustomPortraitIdsList.ToArray();
+            for (int i = 0; i < existingCustomPortraitIds.Length; i++)
+            {
+                PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
+                portraitData.EnsureImagesImport(false);
+                portraitData.CheckIfDefaultPortraitData();
+                if (portraitData.IsDefault && skipDefault)
+                {
+                    continue;
+                }
+                List<string> tagList;
+                if (customTags.ContainsKey(portraitData.CustomId))
+                {
+                    tagList = new List<string>(customTags[portraitData.CustomId].tags);
+                }
+                else
+                {
+                    tagList = new List<string>();
+                }
+                TagData resultTag = new TagData(GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
+                       portraitData.CustomId, tagList);
                 result[resultTag.CustomId] = resultTag;
                 portraitData = null;
             }
@@ -283,7 +323,6 @@ namespace KingmakerPortraitManager
                 {
                     Directory.Delete(exportRootFolder, true);
                     Directory.CreateDirectory(exportRootFolder);
-                    Directory.CreateDirectory(Path.Combine(exportRootFolder,"Portraits"));
                     Directory.CreateDirectory(Path.Combine(exportRootFolder,"tags"));
                 }
                 catch
@@ -309,7 +348,7 @@ namespace KingmakerPortraitManager
             {
                 try
                 {
-                    DirectoryCopy(Path.Combine(portraitRootFolder,customId),Path.Combine(exportRootFolder,"Portraits",customId),true);
+                    DirectoryCopy(Path.Combine(portraitRootFolder,customId),Path.Combine(exportRootFolder,customId),true);
                 }
                 catch (Exception e)
                 {
@@ -448,6 +487,62 @@ namespace KingmakerPortraitManager
             portraitSelector.DrawNewCustomPortraits();
             portraitSelector.HideIfFolderDeleted();
         }
+    }
+
+    static class CustomPortraitManagerExtensions
+    {
+        internal static bool EnsureImagesImport(this PortraitData portraitData, bool force = false)
+        {
+            return portraitData.IsCustom && 
+                    (portraitData.EnsureImageImport(PortraitType.SmallPortrait, force) & 
+                    portraitData.EnsureImageImport(PortraitType.HalfLengthPortrait, force) & 
+                    portraitData.EnsureImageImport(PortraitType.FullLengthPortrait, force));
+        }
+
+        internal static bool EnsureImageImport(this PortraitData portraitData, PortraitType portraitType, bool force = false)
+        {
+            EnsureCustomPortraitsImport(portraitData.m_CustomPortraitId, true);
+            switch (portraitType)
+            {
+                case PortraitType.SmallPortrait:
+                    portraitData.m_PortraitImage = PortraitData.UploadSprite(portraitData.CustomPortraitSmallPath, BlueprintRoot.Instance.CharGen.BasePortraitSmall, force);
+                    return portraitData.m_PortraitImage != null;
+                case PortraitType.HalfLengthPortrait:
+                    portraitData.m_HalfLengthImage = PortraitData.UploadSprite(portraitData.CustomPortraitMediumPath, BlueprintRoot.Instance.CharGen.BasePortraitMedium, force);
+                    return portraitData.m_HalfLengthImage != null;
+                case PortraitType.FullLengthPortrait:
+                    portraitData.m_FullLengthImage = PortraitData.UploadSprite(portraitData.CustomPortraitBigPath, BlueprintRoot.Instance.CharGen.BasePortraitBig, force);
+                    return portraitData.m_FullLengthImage != null;
+                default:
+                    return false;
+            }
+        }
+
+        internal static bool EnsureCustomPortraitsImport(string id, bool createNewIfNotExists)
+        {
+            CustomPortraitsManager.Instance.EnsurePortrait(GetSmallPortraitPathImport(id), BlueprintRoot.Instance.CharGen.BasePortraitSmall);
+            CustomPortraitsManager.Instance.EnsurePortrait(GetMediumPortraitPathImport(id), BlueprintRoot.Instance.CharGen.BasePortraitMedium);
+            CustomPortraitsManager.Instance.EnsurePortrait(GetBigPortraitPathImport(id), BlueprintRoot.Instance.CharGen.BasePortraitBig);
+            return true;
+        }
+
+        private static string GetSmallPortraitPathImport(string id)
+        {
+            return Path.Combine(ModPath, "Import", id, BlueprintRoot.Instance.CharGen.PortraitSmallName + BlueprintRoot.Instance.CharGen.PortraitsFormat);
+        }
+
+        // Token: 0x0600001F RID: 31 RVA: 0x0000263C File Offset: 0x0000083C
+        private static string GetMediumPortraitPathImport(string id)
+        {
+            return Path.Combine(ModPath, "Import", id, BlueprintRoot.Instance.CharGen.PortraitMediumName + BlueprintRoot.Instance.CharGen.PortraitsFormat);
+        }
+
+        // Token: 0x06000020 RID: 32 RVA: 0x0000266D File Offset: 0x0000086D
+        private static string GetBigPortraitPathImport(string id)
+        {
+            return Path.Combine(ModPath, "Import", id, BlueprintRoot.Instance.CharGen.PortraitBigName + BlueprintRoot.Instance.CharGen.PortraitsFormat);
+        }
+
     }
 
 }
