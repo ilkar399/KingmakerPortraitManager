@@ -2,10 +2,9 @@
 This mod is designed to provide a way of better portrait management in Pathfinder Kingmaker.
 ##TODO
 *next
-	portrait pack import/export
-	injections?
-	CustomPortraitManager.GetExistingCustomPortraitIds
-
+	portrait pack import
+	UI
+	Console UI
 	add default tags
 	recent
 *tests
@@ -45,11 +44,15 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 	add ppack export/import
 	tagdata is saved in separate folder
 
-## Install
+##Install
 1. Download and install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21)
 2. Download the [mod](https://github.com/)
 3. Extract the archive and put the mod folder into 'Mods' folder of the Game (\Steam\steamapps\common\Pathfinder Kingmaker\Mods)
 4. Open the interface (Ctrl+f10)
+
+##Compilation notes
+1. Published assembly is required (add link to publisher)
+2. Folder structure
 
 ##Credits to 
 Spacehamster, Hambeard, Holic92, etc.

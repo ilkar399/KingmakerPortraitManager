@@ -10,12 +10,16 @@ using ModMaker.Utility;
 using static KingmakerPortraitManager.Main;
 using static KingmakerPortraitManager.Helpers;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
+using Kingmaker.UnitLogic.Class.LevelUp;
 using Kingmaker.Blueprints;
+using Kingmaker;
+using Kingmaker.UI;
 using Kingmaker.Utility;
 using HarmonyLib;
-using Kingmaker.UI._ConsoleUI.CombatLog;
 using System.Security.Cryptography;
 using Kingmaker.UI.SettingsUI;
+using Kingmaker.UI.LevelUp;
+using Kingmaker.UI.LevelUp.Phase;
 
 namespace KingmakerPortraitManager.Menu
 {
@@ -74,6 +78,7 @@ namespace KingmakerPortraitManager.Menu
                     _tagList = null;
                     _tagData = null;
                 }
+                //Save all non-default data to the filesystem
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitDataAll"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
                     if (tagsData != null)
@@ -95,6 +100,30 @@ namespace KingmakerPortraitManager.Menu
                     portraitData = null;
                     _tagList = new string[] { };
                     _tagData = null;
+                }
+                //Apply filters to the game UI. Requires working harmony patch and a published assembly to complie
+                if (GUILayout.Button(Local["Menu_PortraitList_Btn_ApplyFilters"], _fixedStyle, GUILayout.ExpandWidth(false)))
+                {
+                    if (Game.Instance.IsControllerMouse)
+                    {
+                        if (Game.Instance.UI.CharacterBuildController.Portrait != null) 
+                        {
+                            modEntry.Logger.Log("Game.Instance.UI.CharacterBuildController.Portrait");
+                            if (Game.Instance.UI.CharacterBuildController.Portrait.IsUnlocked)
+                            {
+                                Game.Instance?.UI.CharacterBuildController.Portrait.PortraitSelector.HandleClickUpload(false);
+                            }
+                            else
+                            {
+                                UIHelpers.KbmUpdateCustomPortraits();
+                            }
+                        }
+                    }
+                    //Reserved for when you'll be able to select a custom portrait from the gamepad UI
+/*                    if (Game.Instance.IsControllerGamepad)
+                    {
+                        
+                    }*/
                 }
                 using (new GUILayout.HorizontalScope())
                 {
@@ -172,7 +201,6 @@ namespace KingmakerPortraitManager.Menu
                         {
                             //TODO: labels hash (colored if it's wrong)
                             //TOOD: 
-                            //TODO: Buttons Open folder, Add tag, Clear tags, Save data. List of tags with an "X" that remove said tag
                             GUILayout.Label(Local["Menu_PortraitList_Lbl_tagList"]);
                             if (_tagList.Length > 0)
                             {
@@ -236,6 +264,7 @@ namespace KingmakerPortraitManager.Menu
                             GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_IsCustom"], portraitData.IsCustom));
                             GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_PortraitID"], portraitData.CustomId));
                             //Note: hash is calculated only based on the FulLengthPortrait
+                            //TODO: use red color if hash is different between the tags and portrait one
                             GUILayout.Label(string.Format(Local["Menu_PortraitList_Lbl_Hash"], Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture)));
                             if (GUILayout.Button(Local["Menu_PortraitList_Btn_OpenFolder"], _fixedStyle, GUILayout.ExpandWidth(false)))
                             {

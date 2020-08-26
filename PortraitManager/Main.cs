@@ -5,7 +5,8 @@ using UnityModManagerNet;
 using ModMaker;
 using ModMaker.Utility;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
-
+using UnityEngine;
+using HarmonyLib;
 
 namespace KingmakerPortraitManager
 {
@@ -18,21 +19,36 @@ namespace KingmakerPortraitManager
         public static LocalizationManager<DefaultLanguage> Local;
         public static ModManager<Core, Settings> Mod;
         public static MenuManager Menu;
-
+        public static UnityModManager.ModEntry ModEntry;
         static bool Load(UnityModManager.ModEntry modEntry)
         {
-            //HarmonyLib.Harmony.DEBUG = true;
-            Local = new LocalizationManager<DefaultLanguage>();
-            Mod = new ModManager<Core, Settings>();
-            Menu = new MenuManager();
-            modEntry.OnToggle = OnToggle;
+            try
+            {
 #if (DEBUG)
-            modEntry.OnUnload = Unload;
+                HarmonyLib.Harmony.DEBUG = true;
+#endif
+                Local = new LocalizationManager<DefaultLanguage>();
+                Mod = new ModManager<Core, Settings>();
+                Menu = new MenuManager();
+                ModEntry = modEntry;
+                var harmony = new Harmony(modEntry.Info.Id);
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+                modEntry.OnToggle = OnToggle;
+#if (DEBUG)
+                modEntry.OnUnload = Unload;
+            }
+            catch (Exception e)
+            {
+                modEntry.Logger.Critical(e.ToString() + "\n" + e.StackTrace);
+                throw e;
+            }
             return true;
         }
 
         static bool Unload(UnityModManager.ModEntry modEntry)
         {
+            var harmony = new Harmony(modEntry.Info.Id);
+            harmony.UnpatchAll(modEntry.Info.Id);
             Mod.Disable(modEntry, true);
             Menu = null;
             Mod = null;

@@ -39,6 +39,7 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitList_Btn_RemoveTag", "Remove Tag"},
             { "Menu_PortraitList_Btn_ClearTags", "Clear Tags"},
             { "Menu_PortraitList_Btn_AllTags", "All Tags"},
+            { "Menu_PortraitList_Btn_ApplyFilters", "Apply filters to game"},
             { "Menu_PortraitList_Lbl_IsCustom", "Is Custom: {0}"},
             { "Menu_PortraitList_Lbl_PortraitImage", "Full portrait image (scaled to fit)"},
             { "Menu_PortraitList_Lbl_PortraitID", "Portrait ID: {0}"},

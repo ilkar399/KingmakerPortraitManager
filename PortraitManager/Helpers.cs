@@ -4,11 +4,13 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Kingmaker;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Root;
 using Kingmaker.Blueprints.Validation;
+using Kingmaker.UI.LevelUp;
 using UnityEngine;
 using TinyJson;
 using Kingmaker.EntitySystem.Persistence.JsonUtility;
@@ -179,6 +181,7 @@ namespace KingmakerPortraitManager
         }
     }
 
+    //General helpers
     static class Helpers
     {
         //Filter portraits based on filter selections
@@ -406,6 +409,44 @@ namespace KingmakerPortraitManager
                     DirectoryCopy(subdir.FullName, temppath, copySubDirs);
                 }
             }
+        }
+    }
+    
+    //UI helpers
+    static class UIHelpers
+    {
+        //Update portrait list UI. Used after applying tags in modmenu.
+        //When doing this from the ingame UI - use CharBPortraitSelecto.HandleClickUpload(false) as it's easier.
+        public static void KbmUpdateCustomPortraits()
+        {
+            CharBPortraitSelector portraitSelector = Game.Instance?.UI.CharacterBuildController.Portrait.PortraitSelector;
+            if (portraitSelector.m_SelectorItems == null)
+            {
+                return;
+            }
+            CharBPortraitSelectorItem charBPortraitSelectorItem = portraitSelector.m_SelectorItems.FirstOrDefault((CharBPortraitSelectorItem i) => i.IsCustomPortraitSelector);
+            if (charBPortraitSelectorItem == null)
+            {
+                return;
+            }
+            portraitSelector.m_CustomPortraitIndex = portraitSelector.m_SelectorItems.IndexOf(charBPortraitSelectorItem);
+            portraitSelector.m_CustomPortraits = portraitSelector.LoadAllCustomPortraits();
+            if (portraitSelector.CurrentPortraitIndex != portraitSelector.m_CustomPortraitIndex)
+            {
+                portraitSelector.m_LastChoice = portraitSelector.CurrentPortraitIndex;
+            }
+            portraitSelector.m_SelectorItems[portraitSelector.m_CustomPortraitIndex].gameObject.SetActive(portraitSelector.m_CustomPortraitActivated);
+            portraitSelector.m_UploadDescription.DisappearAnimation(delegate
+            {
+                portraitSelector.m_UploadDescription.gameObject.SetActive(false);
+            });
+            portraitSelector.m_ItemsContainerAnimator.AppearAnimation(null);
+            if (portraitSelector.m_LastChoice == -1)
+            {
+                portraitSelector.m_LastChoice = 0;
+            }
+            portraitSelector.DrawNewCustomPortraits();
+            portraitSelector.HideIfFolderDeleted();
         }
     }
 
