@@ -42,7 +42,6 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 
 *portrait folder 
 	add ppack export/import
-	tagdata is saved in separate folder
 
 ##Install
 1. Download and install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21)

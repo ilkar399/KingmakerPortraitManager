@@ -224,25 +224,6 @@ namespace KingmakerPortraitManager.Menu
                                     _fixedStyle);
                                 }
                             }
-                                 /*                                try
-                                {
-                                    //tag selection and removal
-                                    //TODO - change to togglebutton iterator
-                                    GUIHelper.SelectionGrid(ref _tagIndex, _tagList, 2, () =>
-                                    {
-                                        if (_tagIndex >= 0 && _tagIndex < _tagData.tags.Count)
-                                        {
-                                            _tagData.tags.RemoveAt(_tagIndex);
-                                            _tagList = Helpers.RemoveIndices(_tagList, _tagIndex);
-                                            _tagIndex = -1;
-                                        }
-                                    }, _fixedStyle, GUILayout.ExpandWidth(false));
-                                }
-                                catch (Exception e)
-                                {
-                                    modEntry.Logger.Error(e.StackTrace);
-                                    throw e;
-                                }*/
                             GUILayout.Label(Local["Menu_PortraitList_Lbl_tagMsg"]);
                             using (new GUILayout.HorizontalScope())
                             {

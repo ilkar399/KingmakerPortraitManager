@@ -35,6 +35,8 @@ namespace KingmakerPortraitManager.Menu
                 _buttonStyle = new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft };
             if (currentPortraitTagsData == null)
                 currentPortraitTagsData = new Dictionary<string, TagData>();
+            if (importingPortraitTagsData == null)
+                importingPortraitTagsData = new Dictionary<string, TagData>();
             if (exportMessage == null)
                 exportMessage = "";
             GUILayout.Space(10f);
@@ -71,6 +73,9 @@ namespace KingmakerPortraitManager.Menu
                     }
 
                 }
+            }
+            using (new GUILayout.HorizontalScope())
+            {
                 //Importing portrait pack
                 if (currentPortraitTagsData.Count > 0)
                 {
@@ -97,8 +102,8 @@ namespace KingmakerPortraitManager.Menu
                         //TODO: Toggle Ignore portraits with the same hash, enabled
                         //TODO: Import function.
                     }
-
                 }
+
             }
         }
     }
