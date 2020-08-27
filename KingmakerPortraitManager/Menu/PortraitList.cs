@@ -28,17 +28,17 @@ namespace KingmakerPortraitManager.Menu
     {
         public string Name => Local["Menu_Tab_PortraitList"];
         public int Priority => 100;
-        public static string[] ReservedTags = { "", "all", "recent"};
+        internal static string[] ReservedTags = { "", "all", "recent"};
         public static string[] portraitIDs;
-        internal Dictionary<string,TagData> allPortraitsData;
-        internal Dictionary<string, TagData> tagsData;
-        private Dictionary<string,bool> tagListAll;
+        internal static Dictionary<string,TagData> allPortraitsData;
+        private static Dictionary<string, TagData> tagsData;
+        internal static Dictionary<string,bool> tagListAll;
         private int portraitIndex;
         private int _tagIndex;
         private string inputTagName;
-        private string[] _tagList;
-        private TagData _tagData; 
-        private PortraitData portraitData;
+        private static string[] _tagList;
+        private static TagData _tagData;
+        private static PortraitData portraitData;
         private GUIStyle _buttonStyle;
         private GUIStyle _fixedStyle;
         private Vector2 _scrollPosition;      
@@ -71,20 +71,27 @@ namespace KingmakerPortraitManager.Menu
                 }
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_UnloadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
-                    allPortraitsData = null;
-                    portraitData = null;
-                    portraitIDs = null;
-                    tagsData = null;
-                    tagListAll = null;
-                    _tagList = null;
-                    _tagData = null;
+                    Unload();
                 }
                 //Save all non-default data to the filesystem
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_SavePortraitDataAll"], _buttonStyle, GUILayout.ExpandWidth(false)))
                 {
                     if (tagsData != null)
                     {
-                        Tags.SaveTagsData(tagsData, false);
+                        var changedTagsData = tagsData.Where(kvp =>
+                            {
+                            bool tresult = false;
+                            if (allPortraitsData.ContainsKey(kvp.Key))
+                            {
+                                IEnumerable<string> tdifference = allPortraitsData[kvp.Key].tags.Except(kvp.Value.tags);
+                                    if (!tdifference.Any())
+                                    {
+                                        tresult = true;
+                                    }
+                                }
+                                return tresult;
+                            }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                        Tags.SaveTagsData(changedTagsData, false);
                         allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, ToggleIgnoreDefaultPortraits);
                         tagListAll = Tags.AllTagsFilter(tagsData);
                     }
@@ -303,6 +310,17 @@ namespace KingmakerPortraitManager.Menu
                     }
                 }
             }
+        }
+
+        internal static void Unload()
+        {
+            allPortraitsData = null;
+            portraitData = null;
+            portraitIDs = null;
+            tagsData = null;
+            tagListAll = null;
+            _tagList = null;
+            _tagData = null;
         }
 
     }

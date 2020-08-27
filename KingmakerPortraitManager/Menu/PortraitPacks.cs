@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityModManagerNet;
+using Kingmaker.Blueprints.Root;
 using ModMaker;
 using ModMaker.Utility;
 using static KingmakerPortraitManager.Main;
@@ -19,7 +21,9 @@ namespace KingmakerPortraitManager.Menu
     {
         public string Name => Local["Menu_Tab_PortraitPacks"];
         public int Priority => 200;
+        private bool MergeTags = true;
         private string exportMessage;
+        private string importMessage;
         private GUIStyle _buttonStyle;
         private GUIStyle _fixedStyle;
         private Dictionary<string, TagData> currentTagDirData;
@@ -30,6 +34,7 @@ namespace KingmakerPortraitManager.Menu
 
         public void OnGUI(UnityModManager.ModEntry modEntry)
         {
+            string defaultHash = Helpers.GetPseudoHash(BlueprintRoot.Instance.CharGen.BasePortraitBig.texture).ToString();
             if (Mod == null || !Mod.Enabled) return;
             if (_buttonStyle == null)
                 _buttonStyle = new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft };
@@ -39,6 +44,8 @@ namespace KingmakerPortraitManager.Menu
                 importingPortraitTagsData = new Dictionary<string, TagData>();
             if (exportMessage == null)
                 exportMessage = "";
+            if (importMessage == null)
+                importMessage = "";
             GUILayout.Space(10f);
             using (new GUILayout.HorizontalScope())
             {
@@ -54,9 +61,9 @@ namespace KingmakerPortraitManager.Menu
                     }
                     if (currentPortraitTagsData.Count > 0)
                     {
-                        GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTotal"], currentPortraitTagsData.Count));
+                        GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTotal"], currentPortraitTagsData.Count()));
                         GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTagged"], currentPortraitTagsData.Where(
-                            kvp => kvp.Value.tags.Count() > 0).ToList().Count));
+                            kvp => kvp.Value.tags.Count() > 0).ToList().Count()));
                     }
                 }
                 using (new GUILayout.VerticalScope())
@@ -85,21 +92,30 @@ namespace KingmakerPortraitManager.Menu
                         if (GUILayout.Button(Local["Menu_PortraitPacks_Btn_LoadPortraitsImport"], _buttonStyle, GUILayout.ExpandWidth(false)))
                         {
                             importingTagsData = Tags.LoadTagsData(true);
-                            importingPortraitTagsData = Helpers.ImportPortraitsTags(importingTagsData, true);
+                            importingPortraitTagsData = Helpers.ImportPortraitsTags(importingTagsData, false);
                         }
                         if (importingPortraitTagsData.Count > 0)
                         {
-                            GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTotal"], importingPortraitTagsData.Count));
+                            GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTotal"], importingPortraitTagsData.Count()));
+                            GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsError"], importingPortraitTagsData.Where(
+                                   kvp => kvp.Value.Hash == defaultHash).Count()));
                             GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTagged"], importingPortraitTagsData.Where(
                                 kvp => kvp.Value.tags.Count() > 0).ToList().Count));
-                            //TODO: duplicates with existing by Hash
-                            //TODO: duplicates with existing by ID
+                            IEnumerable<string> idDuplicates = currentPortraitTagsData.Keys.Intersect(importingPortraitTagsData.Keys);
+                            GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsDuplicateHash"],
+                                Tags.HashDuplicatesTagDictionary(currentPortraitTagsData,importingPortraitTagsData)));
                         }
                     }
                     using (new GUILayout.VerticalScope())
                     {
-                        //TODO: Toggle Owervrite existing portraits with the same ID, disabled
-                        //TODO: Toggle Ignore portraits with the same hash, enabled
+                        GUIHelper.ToggleButton(ref MergeTags, Local["Menu_PortraitPacks_Tgl_MergeTags"]);
+                        if (GUILayout.Button(Local["Menu_PortraitPacks_Btn_Import"], _buttonStyle, GUILayout.ExpandWidth(false)))
+                        {
+                            importMessage = Helpers.ImportPortraits(currentPortraitTagsData, importingPortraitTagsData, MergeTags);
+                            if (exportMessage != "")
+                                GUILayout.Label(exportMessage);
+                            PortraitList.Unload();
+                        }
                         //TODO: Import function.
                     }
                 }

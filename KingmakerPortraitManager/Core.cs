@@ -15,6 +15,7 @@ namespace KingmakerPortraitManager
 
         public void HandleModDisable()
         {
+
         }
         public void HandleModEnable()
         {

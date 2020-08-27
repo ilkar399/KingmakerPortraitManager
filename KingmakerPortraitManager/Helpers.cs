@@ -171,7 +171,7 @@ namespace KingmakerPortraitManager
             foreach (string tagID in tagsData.Keys)
             {
                 var tHash = tagsData[tagID].Hash;
-                if (tHash == defaultHash) { continue; }
+                if (tHash == defaultHash && SkipBase) { continue; }
                 if (result.ContainsKey(tHash))
                 {
                     result[tHash].tags.AddRange(tagsData[tagID].tags);
@@ -183,6 +183,20 @@ namespace KingmakerPortraitManager
             }
             return result;
         }
+
+        //Find the number of dublicate Hash entries between to tag dictionaries
+        public static int HashDuplicatesTagDictionary(Dictionary<string,TagData> dict1, Dictionary<string,TagData> dict2)
+        {
+            int result = 0;
+            if ((dict1.Count == 0) || (dict2.Count == 0))
+            {
+                return 0;
+            }
+            IEnumerable<string> dict1Hash = dict1.Select(kvp => kvp.Value.Hash);
+            IEnumerable<string> dict2Hash = dict2.Select(kvp => kvp.Value.Hash);
+            result = dict1Hash.Intersect(dict2Hash).Count();
+            return result;
+        }
     }
 
     //General helpers
@@ -192,8 +206,8 @@ namespace KingmakerPortraitManager
         //If no tag selected, returns all
         public static string[] FilterPortraitIDs(string filterName,
             bool filterValue,
-            Dictionary<string,TagData> allPortraitsData,
-            Dictionary<string,bool> tagListAll)
+            Dictionary<string, TagData> allPortraitsData,
+            Dictionary<string, bool> tagListAll)
         {
             string[] result = new string[] { };
             tagListAll[filterName] = filterValue;
@@ -215,50 +229,15 @@ namespace KingmakerPortraitManager
         }
 
         //Load all tags for all portraits in folder
-        public static Dictionary<string,TagData> LoadAllPortraitsTags(Dictionary<string,TagData> customTags, Boolean skipDefault)
+        public static Dictionary<string, TagData> LoadAllPortraitsTags(Dictionary<string, TagData> customTags, Boolean skipDefault)
         {
             string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
 
-            Dictionary<string,TagData> result = new Dictionary<string, TagData>();
+            Dictionary<string, TagData> result = new Dictionary<string, TagData>();
             for (int i = 0; i < existingCustomPortraitIds.Length; i++)
             {
                 PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
                 portraitData.EnsureImages(false);
-                portraitData.CheckIfDefaultPortraitData();
-                if (portraitData.IsDefault && skipDefault)
-                {
-                    continue;
-                }
-                List<string> tagList;
-                if (customTags.ContainsKey(portraitData.CustomId))
-                {
-                    tagList = new List<string>(customTags[portraitData.CustomId].tags);
-                }
-                else
-                {
-                    tagList = new List<string>();
-                }
-                 TagData resultTag = new TagData(GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
-                        portraitData.CustomId, tagList);
-                result[resultTag.CustomId] = resultTag;
-                portraitData = null;
-            }
-            return result;
-        }
-
-        //Test portraits and return available tags from the Import directory
-        public static Dictionary<string, TagData> ImportPortraitsTags(Dictionary<string, TagData> customTags, Boolean skipDefault)
-        {
-            Dictionary<string, TagData> result = new Dictionary<string, TagData>();
-            var existingCustomPortraitIdsList = Enumerable.ToList<string>(Enumerable.Select<string, string>(
-                Directory.GetDirectories(ModPath + @"/Import"), (string p) => new DirectoryInfo(p).Name)
-                );
-            existingCustomPortraitIdsList.Remove("tags");
-            string[] existingCustomPortraitIds = existingCustomPortraitIdsList.ToArray();
-            for (int i = 0; i < existingCustomPortraitIds.Length; i++)
-            {
-                PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
-                portraitData.EnsureImagesImport(false);
                 portraitData.CheckIfDefaultPortraitData();
                 if (portraitData.IsDefault && skipDefault)
                 {
@@ -281,6 +260,51 @@ namespace KingmakerPortraitManager
             return result;
         }
 
+        //Test portraits and return available tags from the Import directory
+        public static Dictionary<string, TagData> ImportPortraitsTags(Dictionary<string, TagData> customTags, Boolean skipDefault)
+        {
+            Dictionary<string, TagData> result = new Dictionary<string, TagData>();
+            var existingCustomPortraitIdsList = Enumerable.ToList<string>(Enumerable.Select<string, string>(
+                Directory.GetDirectories(ModPath + @"/Import"), (string p) => new DirectoryInfo(p).Name)
+                );
+            existingCustomPortraitIdsList.Remove("tags");
+            string[] existingCustomPortraitIds = existingCustomPortraitIdsList.ToArray();
+            for (int i = 0; i < existingCustomPortraitIds.Length; i++)
+            {
+                try
+                {
+                    PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
+                    portraitData.EnsureImagesImport(false);
+                    portraitData.CheckIfDefaultPortraitData();
+                    if (portraitData.IsDefault && skipDefault)
+                    {
+                        continue;
+                    }
+                    List<string> tagList;
+                    if (customTags.ContainsKey(portraitData.CustomId))
+                    {
+                        tagList = new List<string>(customTags[portraitData.CustomId].tags);
+                    }
+                    else
+                    {
+                        tagList = new List<string>();
+                    }
+                    TagData resultTag = new TagData(GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
+                           portraitData.CustomId, tagList);
+                    result[resultTag.CustomId] = resultTag;
+                    portraitData = null;
+                }
+                catch (Exception ex)
+                {
+                    Main.Mod.Log($"Error processing {existingCustomPortraitIds[i]}");
+#if (DEBUG)
+                    Main.Mod.Log(ex.StackTrace);
+#endif
+                }
+            }
+            return result;
+        }
+
         //Load portrait data for 1 ID
         public static PortraitData LoadPortraitData(string customID)
         {
@@ -291,48 +315,48 @@ namespace KingmakerPortraitManager
 
 
         //Modified LoadAllCustomPortraits from the game. Added skipping default portraits. Not in use now
-		public static List<PortraitData> LoadAllCustomPortraits(Boolean skipDefault)
-		{
-			string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
-			List<PortraitData> list = new List<PortraitData>();
-			for (int i = 0; i < existingCustomPortraitIds.Length; i++)
-			{
-				PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
-				portraitData.EnsureImages(false);
+        public static List<PortraitData> LoadAllCustomPortraits(Boolean skipDefault)
+        {
+            string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
+            List<PortraitData> list = new List<PortraitData>();
+            for (int i = 0; i < existingCustomPortraitIds.Length; i++)
+            {
+                PortraitData portraitData = new PortraitData(existingCustomPortraitIds[i]);
+                portraitData.EnsureImages(false);
                 portraitData.CheckIfDefaultPortraitData();
                 if (portraitData.IsDefault && skipDefault)
                 {
                     continue;
                 }
-				list.Add(portraitData);
-			}
-			return list;
-		}
+                list.Add(portraitData);
+            }
+            return list;
+        }
 
         //Export portraits + tags from game portrait folder to ModPath/Export
         //TODO: Localized messages
-        public static string ExportPortraits(Dictionary <string,TagData> currentPortraitTagsData)
+        public static string ExportPortraits(Dictionary<string, TagData> currentPortraitTagsData)
         {
             string result = "";
             int TagErrorCount = 0;
             int PortraitErrorCount = 0;
-            string portraitRootFolder = Path.Combine(Application.persistentDataPath,BlueprintRoot.Instance.CharGen.PortraitFolderName);
-            string exportRootFolder = Path.Combine(ModPath,"Export");
+            string portraitRootFolder = Path.Combine(Application.persistentDataPath, BlueprintRoot.Instance.CharGen.PortraitFolderName);
+            string exportRootFolder = Path.Combine(ModPath, "Export");
             if (Directory.Exists(exportRootFolder))
-                try 
+                try
                 {
                     Directory.Delete(exportRootFolder, true);
                     Directory.CreateDirectory(exportRootFolder);
-                    Directory.CreateDirectory(Path.Combine(exportRootFolder,"tags"));
+                    Directory.CreateDirectory(Path.Combine(exportRootFolder, "tags"));
                 }
                 catch
                 {
                     Main.Mod.Error("Error initializing export folder.");
                     return "Error initializing export folder.";
                 }
-            
+
             Dictionary<string, TagData> filteredTagData = currentPortraitTagsData.Where(
-                           kvp => kvp.Value.tags.Count() > 0).ToDictionary(kvp => kvp.Key, kvp=> kvp.Value);
+                           kvp => kvp.Value.tags.Count() > 0).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             foreach (TagData tag in filteredTagData.Values)
             {
                 try
@@ -348,7 +372,7 @@ namespace KingmakerPortraitManager
             {
                 try
                 {
-                    DirectoryCopy(Path.Combine(portraitRootFolder,customId),Path.Combine(exportRootFolder,customId),true);
+                    DirectoryCopy(Path.Combine(portraitRootFolder, customId), Path.Combine(exportRootFolder, customId), true);
                 }
                 catch (Exception e)
                 {
@@ -366,6 +390,64 @@ namespace KingmakerPortraitManager
             }
             else result = "Data exported sucessfully.";
             return result;
+        }
+
+        public static string ImportPortraits(Dictionary<string,TagData> currentTagData, Dictionary<string,TagData> importingTagData, bool mergeTags)
+        {
+            /*
+             * TODO
+             * 0. Convert dictionaries to {Hash,TagData}?+
+             * 1. Generate new IDs (by Portrait Hash?)+
+             * 2. Copy new portraits+
+             * 3. Copy new tags+
+             * 4. Overwrite tags+
+             * 5. Merge tags+
+             * 6. Update UI
+             */
+            string defaultHash = Helpers.GetPseudoHash(BlueprintRoot.Instance.CharGen.BasePortraitBig.texture).ToString();
+            string portraitRootFolder = Path.Combine(Application.persistentDataPath, BlueprintRoot.Instance.CharGen.PortraitFolderName);
+            string importRootFolder = Path.Combine(ModPath, "Import");
+            int ErrorCount = 0;
+            Dictionary<string, TagData> clearedImportingTagData = importingTagData.Where(kvp => kvp.Value.Hash != defaultHash).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+//            Dictionary<string, TagData> importingHashData = Tags.HashDictionary(clearedImportingTagData, true);
+            Dictionary<string, TagData> currentHashData = Tags.HashDictionary(currentTagData, true);
+            foreach (KeyValuePair<string, TagData> kvp in importingTagData)
+            {
+                try
+                {
+                    if (!currentHashData.Keys.Contains(kvp.Key) && !currentTagData.Keys.Contains(kvp.Value.Hash))
+                    {
+                        TagData importTag = new TagData(kvp.Value.Hash, kvp.Value.Hash, kvp.Value.tags);
+                        importTag.SaveData(false);
+                        DirectoryCopy(Path.Combine(importRootFolder, kvp.Key), Path.Combine(portraitRootFolder, importTag.CustomId), false);
+                    }
+                    if (currentHashData.Keys.Contains(kvp.Key))
+                    {
+                        if (mergeTags)
+                        {
+                            List<string> mergedTags = currentHashData[kvp.Key].tags.Union(kvp.Value.tags).ToList();
+                            TagData importTag = new TagData(currentHashData[kvp.Key].CustomId, kvp.Value.Hash, mergedTags);
+                            importTag.SaveData(false);
+                        }
+                        else
+                        {
+                            TagData importTag = new TagData(currentHashData[kvp.Key].CustomId, kvp.Value.Hash, kvp.Value.tags);
+                            importTag.SaveData(false);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ErrorCount++;
+#if (DEBUG)
+                    throw ex;
+#endif
+                }
+            }
+            if (ErrorCount > 0)
+                return "${ErrorCount} errors during import";
+            else
+                return "";
         }
 
         //Hashing function used in game. Used here for better compatability
@@ -489,6 +571,7 @@ namespace KingmakerPortraitManager
         }
     }
 
+    //Extensions for importing portrait (needed cause of custom portrait paths )
     static class CustomPortraitManagerExtensions
     {
         internal static bool EnsureImagesImport(this PortraitData portraitData, bool force = false)
