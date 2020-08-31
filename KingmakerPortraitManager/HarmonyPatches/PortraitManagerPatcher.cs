@@ -8,6 +8,7 @@ using System.Reflection.Emit;
 using Kingmaker;
 using KingmakerPortraitManager.Menu;
 using static KingmakerPortraitManager.Main;
+using KingmakerPortraitManager.UI;
 
 namespace KingmakerPortraitManager.HarmonyPatches
 {
@@ -18,12 +19,12 @@ namespace KingmakerPortraitManager.HarmonyPatches
         { 
             static void Postfix(ref string[] __result)
             {
-                if (Mod == null || !Mod.Enabled || PortraitList.portraitIDs == null) return;
-                if (PortraitList.portraitIDs.Length > 0)
+                if (Mod == null || !Mod.Enabled || PortraitTagSelector.portraitIDsUI == null) return;
+                if (PortraitTagSelector.portraitIDsUI.Length > 0)
                 {
                     try
                     {
-                        __result = PortraitList.portraitIDs;
+                        __result = PortraitTagSelector.portraitIDsUI;
                     }
                     catch (Exception e)
                     {
