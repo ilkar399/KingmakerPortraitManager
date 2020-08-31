@@ -20,6 +20,7 @@ namespace KingmakerPortraitManager
         public static ModManager<Core, Settings> Mod;
         public static MenuManager Menu;
         public static UnityModManager.ModEntry ModEntry;
+
         static bool Load(UnityModManager.ModEntry modEntry)
         {
             try
@@ -61,27 +62,20 @@ namespace KingmakerPortraitManager
 #endif
         static bool OnToggle(UnityModManager.ModEntry modEntry, bool value)
         {
-            try
+            if (value)
             {
-                if (value)
-                {
-                    Assembly assembly = Assembly.GetExecutingAssembly();
-                    Local.Enable(modEntry);
-                    Mod.Enable(modEntry, assembly);
-                    Menu.Enable(modEntry, assembly);
-                    ModPath = modEntry.Path;
-                }
-                else
-                {
-                    Menu.Disable(modEntry);
-                    Mod.Disable(modEntry, false);
-                    Local.Disable(modEntry);
-                    ReflectionCache.Clear();
-                }
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                Local.Enable(modEntry);
+                Mod.Enable(modEntry, assembly);
+                Menu.Enable(modEntry, assembly);
+                ModPath = modEntry.Path;
             }
-            catch (Exception ex)
+            else
             {
-                Mod.Error(ex.Message + ex.StackTrace);
+                Menu.Disable(modEntry);
+                Mod.Disable(modEntry, false);
+                Local.Disable(modEntry);
+                ReflectionCache.Clear();
             }
             return true;
         }
