@@ -9,6 +9,7 @@ using ModMaker;
 using ModMaker.Utility;
 using static KingmakerPortraitManager.Main;
 using static KingmakerPortraitManager.Helpers;
+using KingmakerPortraitManager.UI;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
 using Kingmaker.UnitLogic.Class.LevelUp;
 using Kingmaker.Blueprints;
@@ -29,7 +30,7 @@ namespace KingmakerPortraitManager.Menu
         public string Name => Local["Menu_Tab_PortraitList"];
         public int Priority => 100;
         internal static string[] ReservedTags = { "", "all", "recent"};
-        public static string[] portraitIDs;
+        internal static string[] portraitIDs;
         internal static Dictionary<string,TagData> allPortraitsData;
         private static Dictionary<string, TagData> tagsData;
         internal static Dictionary<string,bool> tagListAll;
@@ -113,6 +114,8 @@ namespace KingmakerPortraitManager.Menu
                 //Apply filters to the game UI. Requires working harmony patch and a published assembly to complie
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_ApplyFilters"], _fixedStyle, GUILayout.ExpandWidth(false)))
                 {
+                    PortraitTagSelector.portraitIDsUI = new string[portraitIDs.Count()];
+                    portraitIDs.CopyTo(PortraitTagSelector.portraitIDsUI, 0);
                     if (Game.Instance.IsControllerMouse)
                     {
                         if (Game.Instance.UI.CharacterBuildController.Portrait != null) 

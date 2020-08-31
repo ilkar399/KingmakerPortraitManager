@@ -20,6 +20,8 @@ using Kingmaker.EntitySystem;
 using Kingmaker.Enums;
 using Kingmaker.Utility;
 using Kingmaker.UI.EndlessGameOver;
+using Kingmaker.Blueprints.Root.Strings;
+using System.ComponentModel;
 
 namespace KingmakerPortraitManager
 {
@@ -159,6 +161,54 @@ namespace KingmakerPortraitManager
             Dictionary<string,bool> result = new Dictionary<string,bool>();
             result = tagsData.SelectMany(tagItem => tagItem.Value.tags).Distinct().ToDictionary(p => p, p => false);
             //TODO add recent
+            return result;
+        }
+
+        //TODO Filter portraitIDs by tagname. all is reserved for all tags, just like empty?
+        public static string[] filterPortraitsUI(string tag)
+        {
+            Dictionary<string, TagData> tagsData;
+            Dictionary<string, TagData> allPortraitsData;
+            tagsData = Tags.LoadTagsData(false);
+            allPortraitsData = new Dictionary<string, TagData>();
+            allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, true);
+            string[] result = new string[] { };
+            if (tag == "all" || tag == "")
+            {
+                result = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
+                return result;
+            }
+            result = allPortraitsData.Where(kvp => (kvp.Value.tags.Contains(tag))).Select(kvp => kvp.Value.CustomId).ToArray();
+            return result;
+        }
+
+        //Get list of all Tags while ignoring tags that don't have portraits available
+        //TODO: filter out tags that have 0 portrait ids
+        public static List<string> AllTagListUI()
+        {
+            List<string> result = new List<string>();
+            List<string> list = new List<string>();
+            Dictionary<string, TagData> tagsData;
+            Dictionary<string, TagData> allPortraitsData;
+            tagsData = Tags.LoadTagsData(false);
+            allPortraitsData = new Dictionary<string, TagData>();
+            allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, true);
+            list = tagsData.SelectMany(tagItem => tagItem.Value.tags).Distinct().ToList();
+            foreach (string tagname in list)
+            {
+                int tagCount = allPortraitsData.Where(kvp =>
+                { bool tresult = false;
+                    if (kvp.Value.tags.Contains(tagname))
+                        tresult = true;
+                    return tresult;
+                    }).Count();
+                if (tagCount > 0)
+                {
+                    result.Add(tagname);
+                }
+            }
+            result.Sort();
+            result.Insert(0,"all");
             return result;
         }
 
