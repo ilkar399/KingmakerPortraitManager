@@ -51,6 +51,7 @@ namespace KingmakerPortraitManager.Menu
                 _buttonStyle = new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft };
             if (_fixedStyle == null)
                 _fixedStyle = new GUIStyle(GUI.skin.button) { fixedWidth = 150f, wordWrap = true };
+            List<string> allToggleTags = new List<string>();
             //Overall list operations
             using (new GUILayout.HorizontalScope())
             {
@@ -218,7 +219,7 @@ namespace KingmakerPortraitManager.Menu
                             GUILayout.Label(Local["Menu_PortraitList_Lbl_tagList"]);                            
                             using (new GUILayout.HorizontalScope())
                             {
-                                var allToggleTags = new List<string> (tagListAll.Keys);
+                                allToggleTags = new List<string> (tagListAll.Keys);
                                 foreach (string toggleTagName in allToggleTags)
                                 {
                                     bool tagToggleValue = _tagData.tags.Contains(toggleTagName);
@@ -244,6 +245,11 @@ namespace KingmakerPortraitManager.Menu
                                     {
                                         _tagData.tags.Add(inputTagName.ToLower());
                                         _tagList = _tagList.Concat(new string[] { inputTagName.ToLower() }).ToArray();
+                                        if (!allToggleTags.Contains(inputTagName.ToLower()))
+                                        {
+                                            allToggleTags.Add(inputTagName.ToLower());
+                                            tagListAll[inputTagName.ToLower()] = false;
+                                        }
                                     }
                                 }
                             }

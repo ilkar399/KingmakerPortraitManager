@@ -12,6 +12,7 @@ using Kingmaker.Blueprints.Root;
 using Kingmaker.Blueprints.Validation;
 using Kingmaker.UI.LevelUp;
 using UnityEngine;
+using UnityEngine.UI;
 using TinyJson;
 using Kingmaker.EntitySystem.Persistence.JsonUtility;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
@@ -22,6 +23,7 @@ using Kingmaker.Utility;
 using Kingmaker.UI.EndlessGameOver;
 using Kingmaker.Blueprints.Root.Strings;
 using System.ComponentModel;
+using TMPro;
 
 namespace KingmakerPortraitManager
 {
@@ -165,13 +167,8 @@ namespace KingmakerPortraitManager
         }
 
         //TODO Filter portraitIDs by tagname. all is reserved for all tags, just like empty?
-        public static string[] filterPortraitsUI(string tag)
+        public static string[] filterPortraitsUI(string tag, Dictionary<string, TagData> allPortraitsData)
         {
-            Dictionary<string, TagData> tagsData;
-            Dictionary<string, TagData> allPortraitsData;
-            tagsData = Tags.LoadTagsData(false);
-            allPortraitsData = new Dictionary<string, TagData>();
-            allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, true);
             string[] result = new string[] { };
             if (tag == "all" || tag == "")
             {
@@ -184,15 +181,10 @@ namespace KingmakerPortraitManager
 
         //Get list of all Tags while ignoring tags that don't have portraits available
         //TODO: filter out tags that have 0 portrait ids
-        public static List<string> AllTagListUI()
+        public static List<string> AllTagListUI(Dictionary<string, TagData> tagsData, Dictionary<string, TagData> allPortraitsData)
         {
             List<string> result = new List<string>();
             List<string> list = new List<string>();
-            Dictionary<string, TagData> tagsData;
-            Dictionary<string, TagData> allPortraitsData;
-            tagsData = Tags.LoadTagsData(false);
-            allPortraitsData = new Dictionary<string, TagData>();
-            allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, true);
             list = tagsData.SelectMany(tagItem => tagItem.Value.tags).Distinct().ToList();
             foreach (string tagname in list)
             {
@@ -618,6 +610,17 @@ namespace KingmakerPortraitManager
             }
             portraitSelector.DrawNewCustomPortraits();
             portraitSelector.HideIfFolderDeleted();
+        }
+
+        public static void CopyTextMeshProUGUI(ref TextMeshProUGUI target, TextMeshProUGUI source)
+        {
+            target.fontSize = source.fontSize;
+            target.fontSizeMin = source.fontSizeMin;
+            target.fontSizeMin = source.fontSizeMin;
+            target.fontMaterial = source.fontMaterial;
+            target.font = source.font;
+            target.color = source.color;
+            target.colorGradientPreset = source.colorGradientPreset;
         }
     }
 
