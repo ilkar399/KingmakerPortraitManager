@@ -66,7 +66,7 @@ namespace KingmakerPortraitManager
             { "Menu_Settings_ToggleIgnoreDefaultPortraits","Ignore default portraits while processing"},
             { "Menu_All_Label_NotInGame", "Not in the game. Please start or load the game first." },
             { "GUI_TagSelector_Label","Select tag to filter by:"},
-            { "GUI_TagSelectorItem_Label","Tag"},
+            { "GUI_TagSelectorItem_Label","Custom portrait tag"},
         };
 
         public T Deserialize<T>(TextReader reader)
