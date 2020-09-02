@@ -1,13 +1,10 @@
 ﻿# KingmakerPortraitManager
 This mod is designed to provide a way of better portrait management in Pathfinder Kingmaker.
 ##TODO
+*tests
 *next
-	UI (Add canvss (to hide), positioners + reset, initializing button)
-	Console UI
 	add default tags
 	recent
-*tests
-*PortraitList ui
 
 *settings
 	enable/disable injections
