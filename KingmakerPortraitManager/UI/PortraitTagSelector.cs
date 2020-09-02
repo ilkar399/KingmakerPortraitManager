@@ -76,8 +76,8 @@ namespace KingmakerPortraitManager.UI
             Mod.Debug("Initialize transform");
             portraitTagSelectorCanvas.name = "PortraitTagSelector";
             RectTransform rectPortraitTagSelector = (RectTransform)portraitTagSelectorCanvas.transform;
-            rectPortraitTagSelector.anchorMin = new Vector2(0.66f, 1.0f);
-            rectPortraitTagSelector.anchorMax = new Vector2(0.66f, 1.0f);
+            rectPortraitTagSelector.anchorMin = new Vector2(0.68f, 1.0f);
+            rectPortraitTagSelector.anchorMax = new Vector2(0.68f, 1.0f);
             rectPortraitTagSelector.pivot = new Vector2(0.5f, 0.5f);
             //           rectPortraitTagSelector.localPosition = preFabPos;
             rectPortraitTagSelector.localPosition -= rectPortraitTagSelector.forward;
