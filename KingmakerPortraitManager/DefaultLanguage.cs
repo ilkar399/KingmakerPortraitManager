@@ -64,6 +64,8 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitPacks_Lbl_ExportHint","TODO. Portraits saved to the Exported directory. Portraits to one folder, tags to another. Add zip archiver?"},
             { "Menu_PortraitPacks_Lbl_ImportHint","TODO."},
             { "Menu_Settings_ToggleIgnoreDefaultPortraits","Ignore default portraits while processing"},
+            { "Menu_Settings_Btn_Reset", "Reset settings to default"},
+            { "Menu_Settings_Btn_ClearTags","Remove all saved tags data"},
             { "Menu_All_Label_NotInGame", "Not in the game. Please start or load the game first." },
             { "GUI_TagSelector_Label","Select tag to filter by:"},
             { "GUI_TagSelectorItem_Label","Custom portrait tag"},

@@ -141,8 +141,8 @@ namespace KingmakerPortraitManager
             }
             catch (Exception e)
             {
-                Main.Mod.Log(e.StackTrace);
-                return null;
+                Main.Mod.Error(e.StackTrace);
+                throw e;
             }
             return result;
         }
@@ -226,7 +226,7 @@ namespace KingmakerPortraitManager
             return result;
         }
 
-        //Find the number of dublicate Hash entries between to tag dictionaries
+        //Find the number of dublicate Hash entries between two tag dictionaries
         public static int HashDuplicatesTagDictionary(Dictionary<string,TagData> dict1, Dictionary<string,TagData> dict2)
         {
             int result = 0;
@@ -436,16 +436,6 @@ namespace KingmakerPortraitManager
 
         public static string ImportPortraits(Dictionary<string,TagData> currentTagData, Dictionary<string,TagData> importingTagData, bool mergeTags)
         {
-            /*
-             * TODO
-             * 0. Convert dictionaries to {Hash,TagData}?+
-             * 1. Generate new IDs (by Portrait Hash?)+
-             * 2. Copy new portraits+
-             * 3. Copy new tags+
-             * 4. Overwrite tags+
-             * 5. Merge tags+
-             * 6. Update UI
-             */
             string defaultHash = Helpers.GetPseudoHash(BlueprintRoot.Instance.CharGen.BasePortraitBig.texture).ToString();
             string portraitRootFolder = Path.Combine(Application.persistentDataPath, BlueprintRoot.Instance.CharGen.PortraitFolderName);
             string importRootFolder = Path.Combine(ModPath, "Import");
@@ -662,18 +652,17 @@ namespace KingmakerPortraitManager
             return true;
         }
 
+        //Return import pathes for Portrait IDs
         private static string GetSmallPortraitPathImport(string id)
         {
             return Path.Combine(ModPath, "Import", id, BlueprintRoot.Instance.CharGen.PortraitSmallName + BlueprintRoot.Instance.CharGen.PortraitsFormat);
         }
 
-        // Token: 0x0600001F RID: 31 RVA: 0x0000263C File Offset: 0x0000083C
         private static string GetMediumPortraitPathImport(string id)
         {
             return Path.Combine(ModPath, "Import", id, BlueprintRoot.Instance.CharGen.PortraitMediumName + BlueprintRoot.Instance.CharGen.PortraitsFormat);
         }
 
-        // Token: 0x06000020 RID: 32 RVA: 0x0000266D File Offset: 0x0000086D
         private static string GetBigPortraitPathImport(string id)
         {
             return Path.Combine(ModPath, "Import", id, BlueprintRoot.Instance.CharGen.PortraitBigName + BlueprintRoot.Instance.CharGen.PortraitsFormat);
