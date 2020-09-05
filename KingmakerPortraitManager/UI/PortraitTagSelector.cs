@@ -118,16 +118,6 @@ namespace KingmakerPortraitManager.UI
             //TODO - add button
         }
 
-        //Setup UI element positions. TODO
-/*        public void Setup(GameObject portraitTagSelector)
-        {
-            CharBSequentialSelector charBSequentialSelector = portraitTagSelector.gameObject.GetComponent<CharBSequentialSelector>();
-            RectTransform rectbb = (RectTransform)charBSequentialSelector.m_BackButton.transform;
-            RectTransform rectnb = (RectTransform)charBSequentialSelector.m_NextButton.transform;
-            RectTransform rectCounter = (RectTransform)charBSequentialSelector.m_Counter.transform;
-            RectTransform rectLabel = (RectTransform)m_Label.transform;
-        }*/
-
         //Initializing
 		public void Init()		
 		{
@@ -168,7 +158,6 @@ namespace KingmakerPortraitManager.UI
             }
             else
             {
-//                Mod.Debug("Update");
                 if (m_enabled)
                 {
                     m_enabled = false;

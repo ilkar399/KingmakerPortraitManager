@@ -29,7 +29,7 @@ namespace KingmakerPortraitManager.Menu
     {
         public string Name => Local["Menu_Tab_PortraitList"];
         public int Priority => 100;
-        internal static string[] ReservedTags = { "", "all", "recent"};
+        internal static string[] ReservedTags = { "", "all", "recent", "favorite"};
         internal static string[] portraitIDs;
         internal static Dictionary<string,TagData> allPortraitsData;
         private static Dictionary<string, TagData> tagsData;
@@ -187,7 +187,6 @@ namespace KingmakerPortraitManager.Menu
                                     if (_tagData != null)
                                     {
                                         //TODO check overwrite settings
- //                                       _tagData.Hash = allPortraitsData.Find(tag => tag.CustomId == portraitData.CustomId).Hash;
                                         _tagData.Hash = Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString();
                                         tagsData[portraitData.CustomId] = _tagData;
                                     }
@@ -199,7 +198,6 @@ namespace KingmakerPortraitManager.Menu
                                             Helpers.GetPseudoHash(portraitData.FullLengthPortrait.texture).ToString(),
                                             portraitData.CustomId,
                                             tagsData[portraitData.CustomId].tags);
-//                                        _tagData = tagsData[portraitData.CustomId];
                                         _tagList = _tagData.tags.ToArray();
                                     }
                                     else
