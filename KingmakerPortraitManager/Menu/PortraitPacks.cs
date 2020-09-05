@@ -106,17 +106,20 @@ namespace KingmakerPortraitManager.Menu
                                 Tags.HashDuplicatesTagDictionary(currentPortraitTagsData,importingPortraitTagsData)));
                         }
                     }
-                    using (new GUILayout.VerticalScope())
+                    if (importingPortraitTagsData.Count > 0)
                     {
-                        GUIHelper.ToggleButton(ref MergeTags, Local["Menu_PortraitPacks_Tgl_MergeTags"]);
-                        if (GUILayout.Button(Local["Menu_PortraitPacks_Btn_Import"], _buttonStyle, GUILayout.ExpandWidth(false)))
+                        using (new GUILayout.VerticalScope())
                         {
-                            importMessage = Helpers.ImportPortraits(currentPortraitTagsData, importingPortraitTagsData, MergeTags);
-                            if (exportMessage != "")
-                                GUILayout.Label(exportMessage);
-                            PortraitList.Unload();
+                            GUIHelper.ToggleButton(ref MergeTags, Local["Menu_PortraitPacks_Tgl_MergeTags"]);
+                            if (GUILayout.Button(Local["Menu_PortraitPacks_Btn_Import"], _buttonStyle, GUILayout.ExpandWidth(false)))
+                            {
+                                importMessage = Helpers.ImportPortraits(currentPortraitTagsData, importingPortraitTagsData, MergeTags);
+                                if (exportMessage != "")
+                                    GUILayout.Label(exportMessage);
+                                PortraitList.Unload();
+                            }
+                            //TODO: Import function.
                         }
-                        //TODO: Import function.
                     }
                 }
 

@@ -20,11 +20,14 @@ namespace KingmakerPortraitManager
             { "testff7999999", new TagData("003","testff7999999",new List<string>{"elf","male",})},
         };
 
+        private static Dictionary<string, TagData> tagsData;
+        private static Dictionary<string, TagData> allPortraitsData;
+
 
         public static bool TestLoadAllCustomPortraits()
         {
-            var tagsData = Tags.LoadTagsData(false);
-            var allPortraitsData = new Dictionary<string, TagData>();
+            tagsData = Tags.LoadTagsData(false);
+            allPortraitsData = new Dictionary<string, TagData>();
             allPortraitsData = Helpers.LoadAllPortraitsTags(tagsData, false);
             var portraitIDs = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
             PortraitData portraitData;
@@ -43,7 +46,6 @@ namespace KingmakerPortraitManager
 
         public static bool TestTagIO()
         {
-            //TODO: remove files after the test completion
             foreach(TagData value in testData1.Values)
             {
                 value.SaveData(false);
@@ -65,21 +67,43 @@ namespace KingmakerPortraitManager
             return true;
         }
 
+        public static bool TestAllTagListUI()
+        {
+            var AllTagsFilter = Tags.AllTagListUI(tagsData, allPortraitsData);
+            Main.Mod.Log($"TestAllTagsListUI: {string.Join(", ", AllTagsFilter.ToArray())}");
+            return true;
+        }
+
+        public static bool TestLoadAllPortraitsTags()
+        {
+            var result = Helpers.LoadAllPortraitsTags(tagsData, true);
+            Main.Mod.Log($"TestLoadAllPortraitsTags result count: { result.Count()}");
+            return true;
+        }
+
         public static void TestCleanup()
         {
             foreach (string k in testData1.Keys)
             {
                 File.Delete(ModPath + $"/tags/{k}.json");
+                tagsData = null;
+                allPortraitsData = null;
             }
         }
+
 
         public static bool AllTests()
         {
             //TODO
+            //Import&Export tests?
+            //ImportPortraitsTags
+            //HashDuplicatesTagDictionary
             bool result = true;
             result = result && TestLoadAllCustomPortraits();
             result = result && TestTagIO();
             result = result && TestAllTagsList();
+            result = result && TestAllTagListUI();
+            result = result && TestLoadAllPortraitsTags();
             TestCleanup();
             return result;
         }

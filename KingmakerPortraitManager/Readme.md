@@ -2,16 +2,15 @@
 This mod is designed to provide a way of better portrait management in Pathfinder Kingmaker.
 ##TODO
 *tests
+check that game UI updates correctly on update in mod UI
+
+
 *next
-	add default tags
-	recent
+	tests
 
 *settings
-	enable/disable injections
-	enable/disable UI injections
 	enable/disable filters
-	update tags based on portrait hashes
-	clear saved tag data
+	reset to default
 	clear recent
 *tags
 	Dictionary {<string>,<tagdata>}
@@ -22,7 +21,7 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 	stored in modDirectory/tags/
 	json format in storage, plaintext in portrait directory
 	only jsonstring allowed, converted to lowercase
-	reserved tags: all, recent, "".
+	reserved tags: all, recent, "", favorite.
 	tags are loaded into dictionary {string, List<string>}
 *filters
 	Filter is a List<string> of portraitIDs that won't be shown in UI.
@@ -33,7 +32,6 @@ This mod is designed to provide a way of better portrait management in Pathfinde
 
 *separate tag management tab
 	rename tags (with combining)
-	remove tag
 	?remove tagless portraits
 
 *portrait folder 
