@@ -57,6 +57,12 @@ namespace KingmakerPortraitManager
             return true;
         }
 #else
+            }
+            catch (Exception e)
+            {
+                modEntry.Logger.Critical(e.ToString() + "\n" + e.StackTrace);
+                throw e;
+            }
             return true;
         }
 #endif
