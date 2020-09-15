@@ -91,4 +91,4 @@ Repos
 
 
 ##Credits to 
-Spacehamster, Hambeard, Holic92, etc.
+Spacehamster, Hambeard, Holic92, Hsinyu Chan etc.

@@ -4,6 +4,5 @@
   "Author": "Ilkar",
   "Version": "0.1.0",
   "ManagerVersion": "0.22.0",
-  "Requirements": [],
   "EntryMethod": "KingmakerPortraitManager.Main.Load"
 }

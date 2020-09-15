@@ -304,7 +304,7 @@ namespace KingmakerPortraitManager.Menu
                                 }
                             }
 
-                            using (new GUILayout.VerticalScope())
+                            using (new GUILayout.VerticalScope(GUI.skin.box,GUILayout.MinWidth(340f), GUILayout.MinHeight(500f)))
                             {
                                 //TODO: all 3 images or only 1? AreaScopes?
                                 Texture tex = portraitData.FullLengthPortrait.texture;
@@ -313,7 +313,7 @@ namespace KingmakerPortraitManager.Menu
                                     GUILayout.Label(Local["Menu_PortraitList_Lbl_PortraitImage"]);
                                     if (Event.current.type == EventType.Repaint && positioningRect.x == 0)
                                         positioningRect = GUILayoutUtility.GetLastRect();
-                                    GUILayout.BeginArea(new Rect(positioningRect.x, positioningRect.yMax, 320, 473));
+                                    GUILayout.BeginArea(new Rect(positioningRect.x, positioningRect.yMax, 320f, 473f));
                                     GUILayout.Box(tex);
                                     GUILayout.EndArea();
                                 }
