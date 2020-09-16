@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Kingmaker.Blueprints;
-using static KingmakerPortraitManager.Helpers;
-using static KingmakerPortraitManager.Main;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
 
 namespace KingmakerPortraitManager

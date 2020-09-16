@@ -1,37 +1,23 @@
-﻿using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kingmaker;
-using Kingmaker.Controllers;
 using Kingmaker.PubSubSystem;
 using Kingmaker.UI;
-using Kingmaker.UI.Constructor;
 using Kingmaker.UI.LevelUp;
-using Kingmaker.UI.SettingsUI;
-using Kingmaker.UnitLogic.Class.LevelUp;
-using ModMaker.Utility;
 using TMPro;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 using static KingmakerPortraitManager.Main;
 using static KingmakerPortraitManager.Utility.StatusWrapper;
-using KingmakerPortraitManager.Menu;
-using System.Runtime.CompilerServices;
-using TinyJson;
-using System.Reflection.Emit;
 
 namespace KingmakerPortraitManager.UI
 {
     public class PortraitTagSelector : MonoBehaviour, ISequentialSelectorChanged, IGlobalSubscriber
     {
         public static string[] portraitIDsUI;
+        public static string[] portraitIDsFilter;
         //?        private int portraitIDsTagCount;
 
         [SerializeField]
@@ -83,7 +69,6 @@ namespace KingmakerPortraitManager.UI
             rectPortraitTagSelector.localPosition -= rectPortraitTagSelector.forward;
             rectPortraitTagSelector.rotation = Quaternion.identity;
             //TODO Initialize children positions (copy from prefab?)
-            Mod.Debug("_Label");
             TextMeshProUGUI _Label = portraitTagSelectorCanvas.transform.Find("LabelPlace/Label/LabelText").gameObject.GetComponent<TextMeshProUGUI>();
             RectTransform rectLabel = (RectTransform)_Label.transform;
             rectLabel.anchoredPosition = rectLabel.parent.position;
@@ -94,7 +79,6 @@ namespace KingmakerPortraitManager.UI
             UIHelpers.CopyTextMeshProUGUI(ref _Label, labelPreFab);
             CharBSequentialSelector charBSequentialSelector = portraitTagSelectorCanvas.transform.Find("SequentialSelector").gameObject.GetComponent<CharBSequentialSelector>();
             //Buttons
-            Mod.Debug("_Label");
             Button BackButton = portraitTagSelectorCanvas.transform.Find("SequentialSelector/SequentialSelector/ButtonPlaceBackSelector").gameObject.GetComponent<Button>();
             charBSequentialSelector.m_BackButton = BackButton;
             Button NextButton = portraitTagSelectorCanvas.transform.Find("SequentialSelector/SequentialSelector/ButtonPlaceNextSelector").gameObject.GetComponent<Button>();
@@ -200,6 +184,8 @@ namespace KingmakerPortraitManager.UI
             EventBus.Unsubscribe(this);
             if (portraitIDsUI != null)
                 portraitIDsUI = null;
+            if (portraitIDsFilter != null)
+                portraitIDsFilter = null;
         }
 
         //Filling up data and initializing
@@ -215,8 +201,10 @@ namespace KingmakerPortraitManager.UI
             this.m_Tags.Init(list, Local["GUI_TagSelectorItem_Label"]);
             this.m_Tags.SetIndex(0);
             this.m_Tags.FillData();
+#if (DEBUG)
             Mod.Log("FillData");
             Mod.Log(Game.Instance.UI.CharacterBuildController.CurrentPhase.GetValueOrDefault());
+#endif
         }
 
         //Handling selected element change

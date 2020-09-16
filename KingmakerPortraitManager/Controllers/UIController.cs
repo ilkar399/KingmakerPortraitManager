@@ -12,7 +12,6 @@ using System;
 using System.Reflection;
 using KingmakerPortraitManager.UI;
 using static KingmakerPortraitManager.Main;
-using Kingmaker.UnitLogic.Class.LevelUp.Actions;
 
 namespace KingmakerPortraitManager.Controllers
 {
