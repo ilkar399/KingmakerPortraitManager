@@ -21,6 +21,7 @@ Tag file structure:
 ## Exporting and importing portraits
 Portraits are exported to the "Export" directory in the mod folder and imported from the "Import" directory. Portraits are stored in "Id" folders and tags - in a "tags" subdirectory, as json files with their names corresponding to portrait Ids.
 In the end, the mod folder structure should look like this:
+```
 KingmakerPortraitManager
 │
 ├── tags
@@ -37,7 +38,7 @@ KingmakerPortraitManager
     │   └── *.json
     └── <PortraitID>
 		└── Portrait images
-
+```
 
 ## Compilation notes
 Github page: https://github.com/ilkar399/KingmakerPortraitManager
