@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityModManagerNet;
 using Kingmaker.Blueprints.Root;
 using ModMaker;
 using ModMaker.Utility;
 using static KingmakerPortraitManager.Main;
-using static KingmakerPortraitManager.Helpers;
-using static KingmakerPortraitManager.Utility.SettingsWrapper;
-using Kingmaker.Blueprints;
 
 namespace KingmakerPortraitManager.Menu
 {
@@ -93,6 +86,14 @@ namespace KingmakerPortraitManager.Menu
                         {
                             importingTagsData = Tags.LoadTagsData(true);
                             importingPortraitTagsData = Helpers.ImportPortraitsTags(importingTagsData, false);
+#if (DEBUG)
+                            foreach (var kvp in importingPortraitTagsData)
+                            {
+                                Mod.Log(kvp.Key);
+                                Mod.Log(kvp.Value.Hash);
+                                Mod.Log(string.Join(",",kvp.Value.tags));
+                            }
+#endif
                         }
                         if (importingPortraitTagsData.Count > 0)
                         {

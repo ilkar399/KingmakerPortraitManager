@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using Kingmaker.Blueprints;
 using UnityModManagerNet;
 using ModMaker;
 using ModMaker.Utility;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
-using UnityEngine;
 using HarmonyLib;
 
 namespace KingmakerPortraitManager

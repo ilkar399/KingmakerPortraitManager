@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection;
-using ModMaker;
+﻿using System.Reflection;
 using KingmakerPortraitManager.Controllers;
 
 namespace KingmakerPortraitManager
