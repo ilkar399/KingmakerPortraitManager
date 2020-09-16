@@ -4,5 +4,6 @@
   "Author": "Ilkar",
   "Version": "0.1.0",
   "ManagerVersion": "0.22.0",
-  "EntryMethod": "KingmakerPortraitManager.Main.Load"
+  "EntryMethod": "KingmakerPortraitManager.Main.Load",
+  "Repository": "https://raw.githubusercontent.com/ilkar399/KingmakerPortraitManager/master/KingmakerPortraitManager/Repository.json"
 }

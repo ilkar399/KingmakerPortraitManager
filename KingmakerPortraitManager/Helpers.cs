@@ -2,27 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using Kingmaker;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Kingmaker.Blueprints;
 using Kingmaker.Blueprints.Root;
-using Kingmaker.Blueprints.Validation;
 using Kingmaker.UI.LevelUp;
 using UnityEngine;
-using UnityEngine.UI;
-using TinyJson;
 using Kingmaker.EntitySystem.Persistence.JsonUtility;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
-using Kingmaker.UI._ConsoleUI.CombatLog;
-using Kingmaker.EntitySystem;
+using KingmakerPortraitManager.UI;
 using Kingmaker.Enums;
 using Kingmaker.Utility;
-using Kingmaker.UI.EndlessGameOver;
-using Kingmaker.Blueprints.Root.Strings;
-using System.ComponentModel;
 using TMPro;
 
 namespace KingmakerPortraitManager
@@ -175,6 +165,13 @@ namespace KingmakerPortraitManager
                 result = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
                 return result;
             }
+            if (tag == "filter" && PortraitTagSelector.portraitIDsFilter != null)
+                if (PortraitTagSelector.portraitIDsFilter.Length > 0)
+                {
+                    result = new string[PortraitTagSelector.portraitIDsFilter.Count()];
+                    PortraitTagSelector.portraitIDsFilter.CopyTo(result, 0);
+                    return result;
+                }
             result = allPortraitsData.Where(kvp => (kvp.Value.tags.Contains(tag))).Select(kvp => kvp.Value.CustomId).ToArray();
             return result;
         }
@@ -200,6 +197,7 @@ namespace KingmakerPortraitManager
                 }
             }
             result.Sort();
+            result.Insert(0, "filter");
             result.Insert(0,"all");
             return result;
         }
@@ -260,10 +258,10 @@ namespace KingmakerPortraitManager
             }
             var filteredTags = tagListAll.Where(p => p.Value).Select(kvp => kvp.Key).ToList();
             result = allPortraitsData.Where(kvp => {
-                bool tresult = false;
+                bool tresult = true;
                 foreach (string filteredTag in filteredTags)
                 {
-                    if (kvp.Value.tags.Contains(filteredTag)) return true;
+                    if (!kvp.Value.tags.Contains(filteredTag)) return false;
                 }
                 return tresult;
             }).Select(kvp => kvp.Value.CustomId).ToArray();
@@ -273,6 +271,7 @@ namespace KingmakerPortraitManager
         //Load all tags for all portraits in folder
         public static Dictionary<string, TagData> LoadAllPortraitsTags(Dictionary<string, TagData> customTags, Boolean skipDefault)
         {
+            PortraitTagSelector.portraitIDsUI = new string[] { };
             string[] existingCustomPortraitIds = CustomPortraitsManager.Instance.GetExistingCustomPortraitIds();
 
             Dictionary<string, TagData> result = new Dictionary<string, TagData>();
@@ -631,13 +630,13 @@ namespace KingmakerPortraitManager
             switch (portraitType)
             {
                 case PortraitType.SmallPortrait:
-                    portraitData.m_PortraitImage = PortraitData.UploadSprite(portraitData.CustomPortraitSmallPath, BlueprintRoot.Instance.CharGen.BasePortraitSmall, force);
+                    portraitData.m_PortraitImage = PortraitData.UploadSprite(GetSmallPortraitPathImport(portraitData.CustomId), BlueprintRoot.Instance.CharGen.BasePortraitSmall, force);
                     return portraitData.m_PortraitImage != null;
                 case PortraitType.HalfLengthPortrait:
-                    portraitData.m_HalfLengthImage = PortraitData.UploadSprite(portraitData.CustomPortraitMediumPath, BlueprintRoot.Instance.CharGen.BasePortraitMedium, force);
+                    portraitData.m_HalfLengthImage = PortraitData.UploadSprite(GetMediumPortraitPathImport(portraitData.CustomId), BlueprintRoot.Instance.CharGen.BasePortraitMedium, force);
                     return portraitData.m_HalfLengthImage != null;
                 case PortraitType.FullLengthPortrait:
-                    portraitData.m_FullLengthImage = PortraitData.UploadSprite(portraitData.CustomPortraitBigPath, BlueprintRoot.Instance.CharGen.BasePortraitBig, force);
+                    portraitData.m_FullLengthImage = PortraitData.UploadSprite(GetBigPortraitPathImport(portraitData.CustomId), BlueprintRoot.Instance.CharGen.BasePortraitBig, force);
                     return portraitData.m_FullLengthImage != null;
                 default:
                     return false;
@@ -650,6 +649,29 @@ namespace KingmakerPortraitManager
             CustomPortraitsManager.Instance.EnsurePortrait(GetMediumPortraitPathImport(id), BlueprintRoot.Instance.CharGen.BasePortraitMedium);
             CustomPortraitsManager.Instance.EnsurePortrait(GetBigPortraitPathImport(id), BlueprintRoot.Instance.CharGen.BasePortraitBig);
             return true;
+        }
+
+        private static bool EnsurePortraitImport(string portrait, Sprite baseSprite)
+        {
+            bool result;
+            try
+            {
+                if (File.Exists(portrait))
+                {
+                    result = true;
+                }
+                else
+                {
+                    CustomPortraitsManager.CreateBaseImages(portrait, baseSprite);
+                    result = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                UberDebug.LogChannel("Disk", "The process failed: " + ex.ToString(), Array.Empty<object>());
+                result = false;
+            }
+            return result;
         }
 
         //Return import pathes for Portrait IDs

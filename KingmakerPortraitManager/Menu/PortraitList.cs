@@ -1,27 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityModManagerNet;
 using ModMaker;
 using ModMaker.Utility;
 using static KingmakerPortraitManager.Main;
-using static KingmakerPortraitManager.Helpers;
 using KingmakerPortraitManager.UI;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
-using Kingmaker.UnitLogic.Class.LevelUp;
 using Kingmaker.Blueprints;
 using Kingmaker;
-using Kingmaker.UI;
 using Kingmaker.Utility;
 using static ModMaker.Utility.RichTextExtensions;
-using System.Security.Cryptography;
-using Kingmaker.UI.SettingsUI;
-using Kingmaker.UI.LevelUp;
-using Kingmaker.UI.LevelUp.Phase;
-using TinyJson;
+
 
 namespace KingmakerPortraitManager.Menu
 {
@@ -29,7 +20,7 @@ namespace KingmakerPortraitManager.Menu
     {
         public string Name => Local["Menu_Tab_PortraitList"];
         public int Priority => 100;
-        internal static string[] ReservedTags = { "", "all", "recent", "favorite"};
+        internal static string[] ReservedTags = { "", "all", "recent", "favorite", "filter"};
         internal static string[] portraitIDs;
         internal static Dictionary<string,TagData> allPortraitsData;
         private static Dictionary<string, TagData> tagsData;
@@ -117,14 +108,15 @@ namespace KingmakerPortraitManager.Menu
                 //Apply filters to the game UI. Requires working harmony patch and a published assembly to complie
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_ApplyFilters"], _fixedStyle, GUILayout.ExpandWidth(false)))
                 {
-                    PortraitTagSelector.portraitIDsUI = new string[portraitIDs.Count()];
-                    portraitIDs.CopyTo(PortraitTagSelector.portraitIDsUI, 0);
+                    PortraitTagSelector.portraitIDsFilter = new string[portraitIDs.Count()];
+                    portraitIDs.CopyTo(PortraitTagSelector.portraitIDsFilter, 0);
                     if (Game.Instance.IsControllerMouse)
                     {
                         if (Game.Instance.UI.CharacterBuildController.Portrait != null) 
                         {
                             if (Game.Instance.UI.CharacterBuildController.Portrait.IsUnlocked)
                             {
+                                //TODO update window if filters tag is selected
                                 Game.Instance?.UI.CharacterBuildController.Portrait.PortraitSelector.HandleClickUpload(false);
                             }
                             else

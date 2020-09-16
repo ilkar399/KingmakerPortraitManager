@@ -62,7 +62,7 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitPacks_Lbl_TagsTotal","Total tags: {0}"},
             //TODO
             { "Menu_PortraitPacks_Lbl_ExportHint","TODO. Portraits saved to the Exported directory. Portraits to one folder, tags to another. Add zip archiver?"},
-            { "Menu_PortraitPacks_Lbl_ImportHint","WIP. Don't try without backing up your portrait folder"},
+            { "Menu_PortraitPacks_Lbl_ImportHint","WIP. Don't try without backing up your portrait folder. Portraits are imported to the folder with 'PseudoHash' name instead of the one used in portrait pack"},
             { "Menu_Settings_ToggleIgnoreDefaultPortraits","Ignore default portraits while processing"},
             { "Menu_Settings_Btn_Reset", "Reset settings to default"},
             { "Menu_Settings_Btn_ClearTags","Remove all saved tags data"},
