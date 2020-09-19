@@ -22,7 +22,7 @@ namespace KingmakerPortraitManager.UI
 
         [SerializeField]
         [UsedImplicitly]
-        private CharBSequentialSelector m_Tags;
+        internal CharBSequentialSelector m_Tags;
 
         [SerializeField]
         [UsedImplicitly]
@@ -34,7 +34,6 @@ namespace KingmakerPortraitManager.UI
         private CanvasGroup tagSelectorCanvasGroup;
         private Dictionary<string, TagData> tagsData;
         private Dictionary<string, TagData> allPortraitsData;
-
         private CharacterBuildController m_CharacterBuildController
         {
             get
@@ -210,8 +209,15 @@ namespace KingmakerPortraitManager.UI
         //Handling selected element change
 		public void HandleChooseElement(CharBSequentialSelector selector, int index)
         {
-            if (selector = this.m_Tags)
+            if (!base.gameObject.activeInHierarchy)
             {
+                return;
+            }
+            if (selector == this.m_Tags)
+            {
+#if (DEBUG)
+                Mod.Debug(MethodBase.GetCurrentMethod());
+#endif
                 portraitIDsUI = Tags.filterPortraitsUI(this.m_Tags.m_CurrentItemName.text,this.allPortraitsData);
                 if (Game.Instance.UI.CharacterBuildController.Portrait.IsUnlocked)
                 {
