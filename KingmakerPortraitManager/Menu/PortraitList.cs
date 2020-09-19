@@ -116,8 +116,11 @@ namespace KingmakerPortraitManager.Menu
                         {
                             if (Game.Instance.UI.CharacterBuildController.Portrait.IsUnlocked)
                             {
-                                //TODO update window if filters tag is selected
-                                Game.Instance?.UI.CharacterBuildController.Portrait.PortraitSelector.HandleClickUpload(false);
+                                if (Mod.Core.UI.PortraitTagSelector)
+                                {
+                                    Mod.Core.UI.PortraitTagSelector.HandleChooseElement(Mod.Core.UI.PortraitTagSelector.m_Tags, 1);
+                                }
+//                                Game.Instance?.UI.CharacterBuildController.Portrait.PortraitSelector.HandleClickUpload(false);
                             }
                             else
                             {
