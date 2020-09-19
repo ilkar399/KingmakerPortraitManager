@@ -159,6 +159,9 @@ namespace KingmakerPortraitManager
         //TODO Filter portraitIDs by tagname. all is reserved for all tags, just like empty?
         public static string[] filterPortraitsUI(string tag, Dictionary<string, TagData> allPortraitsData)
         {
+#if (DEBUG)
+            Main.Mod.Debug(PortraitTagSelector.portraitIDsFilter.Length);
+#endif
             string[] result = new string[] { };
             if (tag == "all" || tag == "")
             {
