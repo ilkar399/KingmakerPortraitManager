@@ -85,14 +85,19 @@ namespace KingmakerPortraitManager.Controllers
 
         public void HandleLevelUpStart(UnitDescriptor unit, [CanBeNull] JToken unitJson = null, Action onSuccess = null, LevelUpState.CharBuildMode mode = LevelUpState.CharBuildMode.LevelUp)
         {
-            Attach();
+#if (DEBUG)
+            Mod.Debug(MethodBase.GetCurrentMethod());
+            Mod.Debug(mode.ToString());
+#endif
+            if (mode == LevelUpState.CharBuildMode.CharGen || mode == LevelUpState.CharBuildMode.Respec)
+                Attach();
         }
 
         public void HandleLevelUpComplete(UnitEntityData unit, bool isChargen)
         {
             Detach();
         }
-        #endregion
+#endregion
     }
 
 
