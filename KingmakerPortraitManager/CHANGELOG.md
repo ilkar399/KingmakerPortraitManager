@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2020-09-19
+### Fixed
+- Fixed the mod trying up to load portraits when you're not creating characters/respeccing
+
 ## [0.1.1] - 2020-09-19
 ### Fixed
 - Repackaged the mod properly
