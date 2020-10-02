@@ -247,6 +247,7 @@ namespace KingmakerPortraitManager.Menu
                                             if (!allToggleTags.Contains(inputTagName.ToLower()))
                                             {
                                                 allToggleTags.Add(inputTagName.ToLower());
+                                                allToggleTags.Sort();
                                                 tagListAll[inputTagName.ToLower()] = false;
                                             }
                                         }
