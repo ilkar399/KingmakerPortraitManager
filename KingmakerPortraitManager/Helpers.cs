@@ -246,7 +246,8 @@ namespace KingmakerPortraitManager
     static class Helpers
     {
         //Filter portraits based on filter selections
-        //If no tag selected, returns all
+        //If no tag selected, returns all portrait IDs
+        //Used in PortraitList
         public static string[] FilterPortraitIDs(string filterName,
             bool filterValue,
             Dictionary<string, TagData> allPortraitsData,
@@ -268,6 +269,33 @@ namespace KingmakerPortraitManager
                 }
                 return tresult;
             }).Select(kvp => kvp.Value.CustomId).ToArray();
+            return result;
+        }
+
+        //Filter portraits based on filter selections
+        //If no tag selected, returns all PortraitData
+        //Used in PortraitPacks
+        public static Dictionary<string, TagData> FilterPortraitData(string filterName,
+            bool filterValue,
+            Dictionary<string, TagData> allPortraitsData,
+            Dictionary<string, bool> tagListAll)
+        {
+            Dictionary<string, TagData> result = new Dictionary<string, TagData>();
+            tagListAll[filterName] = filterValue;
+            if (!tagListAll.ContainsValue(true))
+            {
+                result = new Dictionary<string, TagData> (allPortraitsData);
+                return result;
+            }
+            var filteredTags = tagListAll.Where(p => p.Value).Select(kvp => kvp.Key).ToList();
+            result = new Dictionary <string,TagData> (allPortraitsData.Where(kvp => {
+                bool tresult = true;
+                foreach (string filteredTag in filteredTags)
+                {
+                    if (!kvp.Value.tags.Contains(filteredTag)) return false;
+                }
+                return tresult;
+            }).ToDictionary(kvp => kvp.Key,kvp=>kvp.Value));
             return result;
         }
 

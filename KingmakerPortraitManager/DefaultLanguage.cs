@@ -56,6 +56,7 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitPacks_Lbl_CurrentData","Current portraits info:"},
             { "Menu_PortraitPacks_Lbl_ImportingData","Portrait info from the import folder:"},
             { "Menu_PortraitPacks_Lbl_PortraitsTotal","Total non-default portraits: {0}"},
+            { "Menu_PortraitPacks_Lbl_PortraitsSelected","Selected portraits portraits: {0}"},
             { "Menu_PortraitPacks_Lbl_PortraitsTagged","Tagged portraits: {0}"},
             { "Menu_PortraitPacks_Lbl_PortraitsDuplicateHash","Duplicate Hash: {0}"},
             { "Menu_PortraitPacks_Lbl_PortraitsError","Errors checking: {0}"},

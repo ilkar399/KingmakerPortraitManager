@@ -19,10 +19,14 @@ namespace KingmakerPortraitManager.Menu
         private string importMessage;
         private GUIStyle _buttonStyle;
         private GUIStyle _fixedStyle;
-        private Dictionary<string, TagData> currentTagDirData;
+        private Dictionary<string, bool> exportTagList;
+        private Dictionary<string, bool> importTagList;
+        private Dictionary<string, TagData> allTagDirData;
+        private Dictionary<string, TagData> allPortraitTagsData;
         private Dictionary<string, TagData> currentPortraitTagsData;
         private Dictionary<string, TagData> importingTagsData;
         private Dictionary<string, TagData> importingPortraitTagsData;
+        private Dictionary<string, TagData> importingSelectedTagsData;
 
 
         public void OnGUI(UnityModManager.ModEntry modEntry)
@@ -31,6 +35,8 @@ namespace KingmakerPortraitManager.Menu
             if (Mod == null || !Mod.Enabled) return;
             if (_buttonStyle == null)
                 _buttonStyle = new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft };
+            if (allPortraitTagsData == null)
+                allPortraitTagsData = new Dictionary<string, TagData>();
             if (currentPortraitTagsData == null)
                 currentPortraitTagsData = new Dictionary<string, TagData>();
             if (importingPortraitTagsData == null)
@@ -44,29 +50,62 @@ namespace KingmakerPortraitManager.Menu
             {
                 //Exporting portraits
                 //TODO: Remove duplicates
+                //All portrait data
                 using (new GUILayout.VerticalScope())
                 {
                     GUILayout.Label(Local["Menu_PortraitPacks_Lbl_CurrentData"]);
                     if (GUILayout.Button(Local["Menu_PortraitPacks_Btn_LoadPortraits"], _buttonStyle, GUILayout.ExpandWidth(false)))
                     {
-                        currentTagDirData = Tags.LoadTagsData(false);
-                        currentPortraitTagsData = Helpers.LoadAllPortraitsTags(currentTagDirData, true);
+                        allTagDirData = Tags.LoadTagsData(false);
+                        allPortraitTagsData = Helpers.LoadAllPortraitsTags(allTagDirData, true);
                     }
-                    if (currentPortraitTagsData.Count > 0)
+                    if (allPortraitTagsData.Count > 0)
                     {
-                        GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTotal"], currentPortraitTagsData.Count()));
-                        GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTagged"], currentPortraitTagsData.Where(
+                        GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTotal"], allPortraitTagsData.Count()));
+                        GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTagged"], allPortraitTagsData.Where(
                             kvp => kvp.Value.tags.Count() > 0).ToList().Count()));
                     }
                 }
+                //Tag selector
+                using (new GUILayout.VerticalScope())
+                {
+                    if (exportTagList == null)
+                        exportTagList = Tags.AllTagsFilter(allPortraitTagsData);
+                    GUILayout.Label(Local["Menu_PortraitList_Lbl_Filters"]);
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        var filterKeys = new List<string>(exportTagList.Keys);
+                        foreach (string filterName in filterKeys)
+                        {
+                            bool FilterValue = exportTagList[filterName];
+                            GUIHelper.ToggleButton(ref FilterValue, filterName, () =>
+                            {
+                                currentPortraitTagsData = Helpers.FilterPortraitData(filterName, FilterValue, allPortraitTagsData, exportTagList);
+                            }, () =>
+                            {
+                                currentPortraitTagsData = Helpers.FilterPortraitData(filterName, FilterValue, allPortraitTagsData, exportTagList);
+                            },
+                            _fixedStyle);
+                            exportTagList[filterName] = FilterValue;
+                        }
+                    }
+                    if (currentPortraitTagsData != null)
+                    {
+                        GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsSelected"], currentPortraitTagsData.Count()));
+                    }
+                }
+                //Exporting
                 using (new GUILayout.VerticalScope())
                 {
                     GUILayout.Label(Local["Menu_PortraitPacks_Lbl_ExportHint"]);
-                    if (currentPortraitTagsData.Count > 0)
+                    if (allPortraitTagsData.Count > 0)
                     {
                         if (GUILayout.Button(Local["Menu_PortraitPacks_Btn_Export"], _buttonStyle, GUILayout.ExpandWidth(false)))
                         {
-                            exportMessage = Helpers.ExportPortraits(currentPortraitTagsData);
+                            if (currentPortraitTagsData != null)
+                                exportMessage = Helpers.ExportPortraits(currentPortraitTagsData);
+                            else
+                                exportMessage = Helpers.ExportPortraits(allPortraitTagsData);
                         }
                         if (exportMessage != "")
                             GUILayout.Label(exportMessage);
@@ -77,8 +116,9 @@ namespace KingmakerPortraitManager.Menu
             using (new GUILayout.HorizontalScope())
             {
                 //Importing portrait pack
-                if (currentPortraitTagsData.Count > 0)
+                if (allPortraitTagsData.Count > 0)
                 {
+                    //Loading data from import folder
                     using (new GUILayout.VerticalScope())
                     {
                         GUILayout.Label(Local["Menu_PortraitPacks_Lbl_ImportingData"]);
@@ -102,19 +142,48 @@ namespace KingmakerPortraitManager.Menu
                                    kvp => kvp.Value.Hash == defaultHash).Count()));
                             GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsTagged"], importingPortraitTagsData.Where(
                                 kvp => kvp.Value.tags.Count() > 0).ToList().Count));
-                            IEnumerable<string> idDuplicates = currentPortraitTagsData.Keys.Intersect(importingPortraitTagsData.Keys);
+                            IEnumerable<string> idDuplicates = allPortraitTagsData.Keys.Intersect(importingPortraitTagsData.Keys);
                             GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsDuplicateHash"],
-                                Tags.HashDuplicatesTagDictionary(currentPortraitTagsData,importingPortraitTagsData)));
+                                Tags.HashDuplicatesTagDictionary(allPortraitTagsData, importingPortraitTagsData)));
                         }
                     }
                     if (importingPortraitTagsData.Count > 0)
                     {
+                        //Tag selector
+                        using (new GUILayout.VerticalScope())
+                        {
+                            if (importTagList == null)
+                                importTagList = Tags.AllTagsFilter(importingPortraitTagsData);
+                            GUILayout.Label(Local["Menu_PortraitList_Lbl_Filters"]);
+                            using (new GUILayout.HorizontalScope())
+                            {
+                                var filterKeys = new List<string>(importTagList.Keys);
+                                foreach (string filterName in filterKeys)
+                                {
+                                    bool FilterValue = importTagList[filterName];
+                                    GUIHelper.ToggleButton(ref FilterValue, filterName, () =>
+                                    {
+                                        importingSelectedTagsData = Helpers.FilterPortraitData(filterName, FilterValue, importingPortraitTagsData, importTagList);
+                                    }, () =>
+                                    {
+                                        importingSelectedTagsData = Helpers.FilterPortraitData(filterName, FilterValue, importingPortraitTagsData, importTagList);
+                                    },
+                                    _fixedStyle);
+                                    importTagList[filterName] = FilterValue;
+                                }
+                            }
+                            if (importingSelectedTagsData != null)
+                            {
+                                GUILayout.Label(string.Format(Local["Menu_PortraitPacks_Lbl_PortraitsSelected"], importingSelectedTagsData.Count()));
+                            }
+                        }
+                        //Importing data
                         using (new GUILayout.VerticalScope())
                         {
                             GUIHelper.ToggleButton(ref MergeTags, Local["Menu_PortraitPacks_Tgl_MergeTags"]);
                             if (GUILayout.Button(Local["Menu_PortraitPacks_Btn_Import"], _buttonStyle, GUILayout.ExpandWidth(false)))
                             {
-                                importMessage = Helpers.ImportPortraits(currentPortraitTagsData, importingPortraitTagsData, MergeTags);
+                                importMessage = Helpers.ImportPortraits(allPortraitTagsData, importingPortraitTagsData, MergeTags);
                                 if (exportMessage != "")
                                     GUILayout.Label(exportMessage);
                                 PortraitList.Unload();
