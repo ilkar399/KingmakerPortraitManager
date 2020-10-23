@@ -70,9 +70,6 @@ Spacehamster, Hambeard, Holic92, Hsinyu Chan etc.
 
 ## TODO
 
-* next
-	* apply modUI filter into the game UI
-
 * tests
 	* check that game UI updates correctly on update in mod UI
 

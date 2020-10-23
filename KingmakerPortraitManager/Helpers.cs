@@ -469,6 +469,7 @@ namespace KingmakerPortraitManager
             string defaultHash = Helpers.GetPseudoHash(BlueprintRoot.Instance.CharGen.BasePortraitBig.texture).ToString();
             string portraitRootFolder = Path.Combine(Application.persistentDataPath, BlueprintRoot.Instance.CharGen.PortraitFolderName);
             string importRootFolder = Path.Combine(ModPath, "Import");
+            string result = "";
             int ErrorCount = 0;
             Dictionary<string, TagData> clearedImportingTagData = importingTagData.Where(kvp => kvp.Value.Hash != defaultHash).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 //            Dictionary<string, TagData> importingHashData = Tags.HashDictionary(clearedImportingTagData, true);
@@ -507,9 +508,10 @@ namespace KingmakerPortraitManager
                 }
             }
             if (ErrorCount > 0)
-                return "${ErrorCount} errors during import";
+                result = $"{ErrorCount} errors during import.";
             else
-                return "";
+                result = $"{importingTagData.Count} imported sucessfully.";
+            return result;
         }
 
         //Hashing function used in game. Used here for better compatability
