@@ -217,6 +217,7 @@ namespace KingmakerPortraitManager.Menu
                                 GUILayout.Label(Local["Menu_PortraitList_Lbl_tagList"]);
                                 GUILayout.Space(10f);
                                 allToggleTags = new List<string>(tagListAll.Keys);
+                                allToggleTags.Sort();
                                 foreach (string toggleTagName in allToggleTags)
                                 {
                                     bool tagToggleValue = _tagData.tags.Contains(toggleTagName);
