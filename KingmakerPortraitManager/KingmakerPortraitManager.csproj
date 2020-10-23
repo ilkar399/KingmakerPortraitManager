@@ -137,7 +137,6 @@
     <None Include="Repository.json" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="json1.json" />
     <Content Include="Settings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
