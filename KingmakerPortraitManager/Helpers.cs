@@ -10,6 +10,7 @@ using Kingmaker.UI.LevelUp;
 using UnityEngine;
 using Kingmaker.EntitySystem.Persistence.JsonUtility;
 using static KingmakerPortraitManager.Utility.SettingsWrapper;
+using static ModMaker.Utility.RichTextExtensions;
 using KingmakerPortraitManager.UI;
 using Kingmaker.Enums;
 using Kingmaker.Utility;
@@ -106,6 +107,15 @@ namespace KingmakerPortraitManager
 
     class Tags
     {
+        //Filter state for UI menu
+        public enum FilterState
+        {
+            Allow = 0,
+            Require = 1,
+            Exclude = 2,
+
+        }
+
         //Load all tags from tag directory
         public static Dictionary<string, TagData> LoadTagsData(Boolean isImport)
         {
@@ -148,10 +158,10 @@ namespace KingmakerPortraitManager
         }
 
         //Get an initial filter tags dictionary based on all tag data
-        public static Dictionary<string,bool> AllTagsFilter(Dictionary<string, TagData> tagsData)
+        public static Dictionary<string,FilterState> AllTagsFilter(Dictionary<string, TagData> tagsData)
         {
-            Dictionary<string,bool> result = new Dictionary<string,bool>();
-            result = tagsData.SelectMany(tagItem => tagItem.Value.tags).Distinct().ToDictionary(p => p, p => false);
+            Dictionary<string, FilterState> result = new Dictionary<string, FilterState>();
+            result = tagsData.SelectMany(tagItem => tagItem.Value.tags).Distinct().ToDictionary(p => p, p => FilterState.Allow);
             //TODO add recent
             return result;
         }
@@ -248,24 +258,30 @@ namespace KingmakerPortraitManager
         //Filter portraits based on filter selections
         //If no tag selected, returns all portrait IDs
         //Used in PortraitList
+        //0 - ignore, 1 - require, 2 - exclude
         public static string[] FilterPortraitIDs(string filterName,
-            bool filterValue,
+            Tags.FilterState filterValue,
             Dictionary<string, TagData> allPortraitsData,
-            Dictionary<string, bool> tagListAll)
+            Dictionary<string, Tags.FilterState> tagListAll)
         {
             string[] result = new string[] { };
             tagListAll[filterName] = filterValue;
-            if (!tagListAll.ContainsValue(true))
+            if (!tagListAll.ContainsValue(Tags.FilterState.Exclude) && !tagListAll.ContainsValue(Tags.FilterState.Require))
             {
                 result = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
                 return result;
             }
-            var filteredTags = tagListAll.Where(p => p.Value).Select(kvp => kvp.Key).ToList();
+            var requiredTags = tagListAll.Where(p =>  p.Value == Tags.FilterState.Require).Select(kvp => kvp.Key).ToList();
+            var forbiddenTags = tagListAll.Where(p => p.Value == Tags.FilterState.Exclude).Select(kvp => kvp.Key).ToList();
             result = allPortraitsData.Where(kvp => {
                 bool tresult = true;
-                foreach (string filteredTag in filteredTags)
+                foreach (string filteredTag in requiredTags)
                 {
                     if (!kvp.Value.tags.Contains(filteredTag)) return false;
+                }
+                foreach (string filteredTag in forbiddenTags)
+                {
+                    if (kvp.Value.tags.Contains(filteredTag)) return false;
                 }
                 return tresult;
             }).Select(kvp => kvp.Value.CustomId).ToArray();
@@ -276,23 +292,28 @@ namespace KingmakerPortraitManager
         //If no tag selected, returns all PortraitData
         //Used in PortraitPacks
         public static Dictionary<string, TagData> FilterPortraitData(string filterName,
-            bool filterValue,
+            Tags.FilterState filterValue,
             Dictionary<string, TagData> allPortraitsData,
-            Dictionary<string, bool> tagListAll)
+            Dictionary<string, Tags.FilterState> tagListAll)
         {
             Dictionary<string, TagData> result = new Dictionary<string, TagData>();
             tagListAll[filterName] = filterValue;
-            if (!tagListAll.ContainsValue(true))
+            if (!tagListAll.ContainsValue(Tags.FilterState.Exclude) && !tagListAll.ContainsValue(Tags.FilterState.Require))
             {
                 result = new Dictionary<string, TagData> (allPortraitsData);
                 return result;
             }
-            var filteredTags = tagListAll.Where(p => p.Value).Select(kvp => kvp.Key).ToList();
+            var requiredTags = tagListAll.Where(p => p.Value == Tags.FilterState.Require).Select(kvp => kvp.Key).ToList();
+            var forbiddenTags = tagListAll.Where(p => p.Value == Tags.FilterState.Exclude).Select(kvp => kvp.Key).ToList();
             result = new Dictionary <string,TagData> (allPortraitsData.Where(kvp => {
                 bool tresult = true;
-                foreach (string filteredTag in filteredTags)
+                foreach (string filteredTag in requiredTags)
                 {
                     if (!kvp.Value.tags.Contains(filteredTag)) return false;
+                }
+                foreach (string filteredTag in forbiddenTags)
+                {
+                    if (kvp.Value.tags.Contains(filteredTag)) return false;
                 }
                 return tresult;
             }).ToDictionary(kvp => kvp.Key,kvp=>kvp.Value));
@@ -596,10 +617,56 @@ namespace KingmakerPortraitManager
             }
         }
     }
-    
+
     //UI helpers
     static class UIHelpers
     {
+        //Making a string with a toggle flag for multitoggle
+        public static string MultiToggleText(int toggleState, string text)
+        {
+            string[] formatStrings= {
+                "☐".Bold().Color(RGBA.grey) + " - {0}",
+                "✔".Bold().Color(RGBA.lime) + " - {0}",
+                "✖".Bold().Color(RGBA.red) + " - {0}",
+                "⚐".Bold().Color(RGBA.yellow) + " - {0}",
+            };
+            string result = "_ - {0}";
+            switch (toggleState)
+            {
+                case 0:
+                    result = string.Format(formatStrings[0], text);
+                    break;
+                case 1:
+                    result = string.Format(formatStrings[1], text);
+                    break;
+                case 2:
+                    result = string.Format(formatStrings[2], text);
+                    break;
+                case 3:
+                    result = string.Format(formatStrings[3], text);
+                    break;
+                default:
+                    result = "_ - {0}";
+                    break;
+            }
+            return result;
+        }
+
+        //Toggle with multiple states
+        public static int MultiToggle(int toggleState, string text, int maxToggle = 1, GUIStyle style = null, params GUILayoutOption[] options)
+
+        {
+            if (toggleState > maxToggle)
+                toggleState = 0;
+            if (GUILayout.Button(MultiToggleText(toggleState, text), style ?? GUI.skin.button, options))
+            {
+                toggleState++;
+                if (toggleState > maxToggle)
+                    toggleState = 0;
+            }
+            return toggleState;
+        }
+
         //Update portrait list UI. Used after applying tags in modmenu.
         //When doing this from the ingame UI - use CharBPortraitSelecto.HandleClickUpload(false) as it's easier.
         public static void KbmUpdateCustomPortraits()

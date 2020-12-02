@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.4] - 2020-12-02
+### Added
+- Additional filter options for tag selectors
+
 ## [0.1.3] - 2020-10-23
 ### Added
 - Added the tag selection during portrait Export/Import
