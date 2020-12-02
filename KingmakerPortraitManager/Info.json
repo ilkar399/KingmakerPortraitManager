@@ -2,7 +2,7 @@
   "Id": "KingmakerPortraitManager",
   "DisplayName": "Pathfinder Portrait Manager",
   "Author": "Ilkar",
-  "Version": "0.1.3a",
+  "Version": "0.1.4",
   "ManagerVersion": "0.22.0",
   "EntryMethod": "KingmakerPortraitManager.Main.Load",
   "Repository": "https://raw.githubusercontent.com/ilkar399/KingmakerPortraitManager/master/KingmakerPortraitManager/Repository.json"

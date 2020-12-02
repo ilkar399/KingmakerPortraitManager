@@ -46,7 +46,7 @@ namespace KingmakerPortraitManager
             { "Menu_PortraitList_Lbl_Hash", "Portrait hash: {0}"},
             { "Menu_PortraitList_Lbl_tagMsg", "Add tag:"},
             { "Menu_PortraitList_Lbl_tagList", "List of tags (click to remove):"},
-            { "Menu_PortraitList_Lbl_Filters","Filter portraits by:"},
+            { "Menu_PortraitList_Lbl_Filters","Filter portraits (☐ - ignore, ✔ - require, ✖ - exclude):"},
             { "Menu_PortraitList_Lbl_PortraitListHeader","Portrait list by id:"},
             { "Menu_PortraitPacks_Btn_LoadPortraits","Load Portraits"},
             { "Menu_PortraitPacks_Btn_LoadPortraitsImport","Load Portraits from the Import folder"},

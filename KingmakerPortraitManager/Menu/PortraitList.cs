@@ -24,7 +24,7 @@ namespace KingmakerPortraitManager.Menu
         internal static string[] portraitIDs;
         internal static Dictionary<string,TagData> allPortraitsData;
         private static Dictionary<string, TagData> tagsData;
-        internal static Dictionary<string,bool> tagListAll;
+        internal static Dictionary<string, Tags.FilterState> tagListAll;
         private int portraitIndex;
         private int _tagIndex;
         private string inputTagName;
@@ -99,7 +99,7 @@ namespace KingmakerPortraitManager.Menu
                 if (GUILayout.Button(Local["Menu_PortraitList_Btn_AllTags"],_fixedStyle,GUILayout.ExpandWidth(false)))
                  {
                     portraitIDs = allPortraitsData.Values.Select(type => type?.CustomId).ToArray();
-                    tagListAll = tagListAll.ToDictionary(p => p.Key, p => false);
+                    tagListAll = tagListAll.ToDictionary(p => p.Key, p => Tags.FilterState.Allow);
                     portraitIndex = -1;
                     portraitData = null;
                     _tagList = new string[] { };
@@ -140,23 +140,9 @@ namespace KingmakerPortraitManager.Menu
                     var filterKeys = new List<string> (tagListAll.Keys);
                     foreach (string filterName in filterKeys)
                     {
-                        bool FilterValue = tagListAll[filterName];
-                        GUIHelper.ToggleButton(ref FilterValue, filterName,() =>
-                        {
-                            portraitIDs = Helpers.FilterPortraitIDs(filterName, FilterValue, allPortraitsData, tagListAll);
-                            portraitIndex = -1;
-                            portraitData = null;
-                            _tagList = new string[] { };
-                            _tagData = null;
-                        },() =>
-                        {
-                            portraitIDs = Helpers.FilterPortraitIDs(filterName, FilterValue, allPortraitsData, tagListAll);
-                            portraitIndex = -1;
-                            portraitData = null;
-                            _tagList = new string[] { };
-                            _tagData = null;
-                        },
-                        _fixedStyle);
+                        Tags.FilterState FilterValue = tagListAll[filterName];
+                        FilterValue = (Tags.FilterState)UIHelpers.MultiToggle((int)FilterValue, filterName, 2, _fixedStyle);
+                        portraitIDs = Helpers.FilterPortraitIDs(filterName,(Tags.FilterState)FilterValue, allPortraitsData,tagListAll);
                         tagListAll[filterName] = FilterValue;
                     }
                 }
@@ -249,7 +235,7 @@ namespace KingmakerPortraitManager.Menu
                                             {
                                                 allToggleTags.Add(inputTagName.ToLower());
                                                 allToggleTags.Sort();
-                                                tagListAll[inputTagName.ToLower()] = false;
+                                                tagListAll[inputTagName.ToLower()] = Tags.FilterState.Allow;
                                             }
                                         }
                                     }
