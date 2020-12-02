@@ -19,8 +19,8 @@ namespace KingmakerPortraitManager.Menu
         private string importMessage;
         private GUIStyle _buttonStyle;
         private GUIStyle _fixedStyle;
-        private Dictionary<string, bool> exportTagList;
-        private Dictionary<string, bool> importTagList;
+        private Dictionary<string, Tags.FilterState> exportTagList;
+        private Dictionary<string, Tags.FilterState> importTagList;
         private Dictionary<string, TagData> allTagDirData;
         private Dictionary<string, TagData> allPortraitTagsData;
         private Dictionary<string, TagData> currentPortraitTagsData;
@@ -81,15 +81,9 @@ namespace KingmakerPortraitManager.Menu
                             var exportFilterKeys = new List<string>(exportTagList.Keys);
                             foreach (string filterName in exportFilterKeys)
                             {
-                                bool FilterValue = exportTagList[filterName];
-                                GUIHelper.ToggleButton(ref FilterValue, filterName, () =>
-                                {
-                                    currentPortraitTagsData = Helpers.FilterPortraitData(filterName, FilterValue, allPortraitTagsData, exportTagList);
-                                }, () =>
-                                {
-                                    currentPortraitTagsData = Helpers.FilterPortraitData(filterName, FilterValue, allPortraitTagsData, exportTagList);
-                                },
-                                _fixedStyle);
+                                Tags.FilterState FilterValue = exportTagList[filterName];
+                                FilterValue = (Tags.FilterState)UIHelpers.MultiToggle((int)FilterValue, filterName, 2, _fixedStyle);
+                                currentPortraitTagsData = Helpers.FilterPortraitData(filterName, FilterValue, allPortraitTagsData, exportTagList);
                                 exportTagList[filterName] = FilterValue;
                             }
                         }
@@ -166,16 +160,10 @@ namespace KingmakerPortraitManager.Menu
                                 var filterKeys = new List<string>(importTagList.Keys);
                                 foreach (string filterName in filterKeys)
                                 {
-                                    bool FilterValue = importTagList[filterName];
-                                    GUIHelper.ToggleButton(ref FilterValue, filterName, () =>
-                                    {
-                                        importingSelectedTagsData = Helpers.FilterPortraitData(filterName, FilterValue, importingPortraitTagsData, importTagList);
-                                    }, () =>
-                                    {
-                                        importingSelectedTagsData = Helpers.FilterPortraitData(filterName, FilterValue, importingPortraitTagsData, importTagList);
-                                    },
-                                    _fixedStyle);
-                                    importTagList[filterName] = FilterValue;
+                                    Tags.FilterState FilterValue2 = importTagList[filterName];
+                                    FilterValue2 = (Tags.FilterState)UIHelpers.MultiToggle((int)FilterValue2, filterName, 2, _fixedStyle);
+                                    importingSelectedTagsData = Helpers.FilterPortraitData(filterName, FilterValue2, importingPortraitTagsData, importTagList);
+                                    importTagList[filterName] = FilterValue2;
                                 }
                             }
                             if (importingSelectedTagsData != null)
